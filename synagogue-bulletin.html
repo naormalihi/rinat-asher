@@ -992,7 +992,7 @@ function renderPub(){
       <div class="pchip">
         <span class="pchip-lbl">פרשת השבוע</span>
         <div class="pchip-div"></div>
-        <span class="pchip-name">פרשת ${D.parasha}</span>
+        <span class="pchip-name">${D.parasha}</span>
       </div>
       <div class="trow">
         <div class="tblk">
@@ -1312,6 +1312,20 @@ function openPrint(){buildPrint();document.getElementById('pv').classList.add('o
 function closePrint(){document.getElementById('pv').classList.remove('on');}
 
 function buildPrint(){
+  // חשב תאריכים מראש
+  let _gregDate = '', _hebDate = '';
+  try{
+    const _now = new Date();
+    _gregDate = _now.toLocaleDateString('he-IL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const _parts = new Intl.DateTimeFormat('he-IL-u-ca-hebrew',{
+      year:'numeric',month:'long',day:'numeric'
+    }).formatToParts(_now);
+    const _dayNum  = parseInt(_parts.find(p=>p.type==='day')?.value||'0');
+    const _month   = _parts.find(p=>p.type==='month')?.value||'';
+    const _yearNum = parseInt(_parts.find(p=>p.type==='year')?.value||'0');
+    _hebDate = `${numToHebrew(_dayNum)} ב${_month} ${numToHebrew(_yearNum%1000)}`;
+  }catch(e){}
+
   const prs=(D.prayers||[]).map(p=>`
     <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;
                 border-bottom:1px solid #E8EFF8;${p.hl?'background:#EDF7E6;':''}">
@@ -1353,9 +1367,9 @@ function buildPrint(){
       <div style="background:#fff;margin:16px;border-radius:16px;
                   border:1px solid #D0DFF0;border-top:3px solid #1A6EBD;
                   padding:18px;text-align:center;box-shadow:0 2px 8px rgba(26,110,189,.08)">
-        <div style="font-size:13px;color:#6A84A0;margin-bottom:6px" id="pc-greg-date"></div>
+        <div style="font-size:13px;color:#6A84A0;margin-bottom:6px">${_gregDate}</div>
         <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;
-                    color:#0D1B2E;margin-bottom:12px" id="pc-heb-date"></div>
+                    color:#0D1B2E;margin-bottom:12px">${_hebDate}</div>
         <div style="display:inline-flex;align-items:center;gap:10px;
                     background:#E8F2FB;border:1px solid #AACDE8;
                     border-radius:50px;padding:8px 22px">
@@ -1363,7 +1377,7 @@ function buildPrint(){
                         color:#1A6EBD;text-transform:uppercase">פרשת השבוע</span>
           <div style="width:1px;height:14px;background:#AACDE8"></div>
           <span style="font-family:Georgia,serif;font-size:17px;
-                        font-weight:700;color:#1A6EBD">פרשת ${D.parasha}</span>
+                        font-weight:700;color:#1A6EBD">${D.parasha}</span>
         </div>
       </div>
 
@@ -1425,20 +1439,6 @@ function buildPrint(){
       </div>
     </div>`;
 
-  // תאריך עברי בתמונה
-  try{
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat('he-IL-u-ca-hebrew',{
-      year:'numeric',month:'long',day:'numeric'
-    }).formatToParts(now);
-    const dayNum = parseInt(parts.find(p=>p.type==='day')?.value||'0');
-    const month  = parts.find(p=>p.type==='month')?.value||'';
-    const yearNum= parseInt(parts.find(p=>p.type==='year')?.value||'0');
-    const el = document.getElementById('pc-heb-date');
-    if(el) el.textContent = `${numToHebrew(dayNum)} ב${month} ${numToHebrew(yearNum%1000)}`;
-    const gel = document.getElementById('pc-greg-date');
-    if(gel) gel.textContent = now.toLocaleDateString('he-IL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  }catch(e){}
 }
 
 
