@@ -369,7 +369,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 .ptop{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border);z-index:1}
 .ptop-lbl{font-size:.82rem;font-weight:600;color:var(--t2)}
 .ptop-btns{display:flex;gap:8px}
-#pc{width:420px;margin:28px auto 60px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-lg);overflow:hidden}
+#pc{width:390px;margin:28px auto 60px;background:#F5F8FC;border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-lg);overflow:hidden}
 
 /* TOAST */
 /* ── DATE BAR ── */
@@ -1313,58 +1313,152 @@ function closePrint(){document.getElementById('pv').classList.remove('on');}
 
 function buildPrint(){
   const prs=(D.prayers||[]).map(p=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:11px 20px;border-bottom:1px solid #E2E0D8;${p.hl?'background:#F5EFE6;':''}">
-      <div style="width:5px;height:5px;border-radius:50%;background:${p.hl?'#C4965A':'#C8C4B8'};flex-shrink:0"></div>
-      <div style="flex:1;font-size:.88rem;color:${p.hl?'#1A1916':'#4A4840'};font-family:Heebo,sans-serif;font-weight:${p.hl?500:400}">${p.name}</div>
-      <div style="font-family:Georgia,serif;font-size:1.1rem;color:${p.hl?'#8B6A3E':'#1A1916'};direction:ltr">${p.time}</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;
+                border-bottom:1px solid #E8EFF8;${p.hl?'background:#EDF7E6;':''}">
+      <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;
+                  background:${p.hl?'#4EA830':'#A8C0DC'}"></div>
+      <div style="flex:1;font-size:15px;color:${p.hl?'#1A1916':'#2A4060'};
+                  font-family:Heebo,sans-serif;font-weight:${p.hl?600:400}">${p.name}</div>
+      <div style="font-family:Georgia,serif;font-size:17px;
+                  color:${p.hl?'#4EA830':'#1A6EBD'};direction:ltr;font-weight:700">${p.time}</div>
     </div>`).join('');
 
-  const ans=(D.announcements||[]).map(a=>`
-    <div style="margin-bottom:10px;padding:14px 16px;background:#F7F6F2;border:1px solid #E2E0D8;border-radius:10px;border-right:3px solid #C4965A">
-      <div style="font-family:Georgia,serif;font-size:.95rem;font-weight:700;color:#1A1916;margin-bottom:5px">${a.title}</div>
-      <div style="font-size:.8rem;color:#8A8778;line-height:1.65;font-family:Heebo,sans-serif">${a.body}</div>
+  const anns=(D.announcements||[]).map(a=>`
+    <div style="margin-bottom:12px;padding:14px 18px;background:#F5F8FC;
+                border:1px solid #D0DFF0;border-radius:12px;
+                border-right:4px solid #1A6EBD">
+      <div style="font-family:Georgia,serif;font-size:15px;font-weight:700;
+                  color:#0D1B2E;margin-bottom:5px">${a.title}</div>
+      <div style="font-size:13px;color:#6A84A0;line-height:1.65;
+                  font-family:Heebo,sans-serif">${a.body}</div>
     </div>`).join('');
 
   document.getElementById('pc').innerHTML=`
-    <div style="direction:rtl;font-family:Heebo,sans-serif;background:#fff">
-      <div style="background:linear-gradient(135deg,#8B6A3E,#C4965A);padding:28px;text-align:center">
-        <div style="font-family:Georgia,serif;font-size:1.8rem;font-weight:700;color:#fff;letter-spacing:-.01em;margin-bottom:4px">${D.nameHe}</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.7);letter-spacing:.12em">${D.community}</div>
+    <div style="width:100%;direction:rtl;font-family:Heebo,sans-serif;
+                background:#F5F8FC;min-height:100%">
+
+      <!-- HEADER -->
+      <div style="background:linear-gradient(135deg,#1A6EBD 0%,#2280D0 100%);
+                  padding:36px 28px 28px;text-align:center">
+        <img src="${document.querySelector('.nav-brand img')?.src||''}"
+             style="height:52px;width:auto;margin-bottom:14px;display:block;margin-left:auto;margin-right:auto"
+             onerror="this.style.display='none'">
+        <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;
+                    color:#fff;margin-bottom:4px">${D.nameHe}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);
+                    letter-spacing:.08em">קהילה מסורתית אורנית – צמרות</div>
       </div>
-      <div style="padding:24px 28px">
-        <div style="text-align:center;margin-bottom:24px">
-          <div style="display:inline-flex;align-items:center;gap:10px;background:#F5EFE6;border:1px solid #DCC9A8;border-radius:50px;padding:8px 22px">
-            <span style="font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#8B6A3E;text-transform:uppercase">פרשת השבוע</span>
-            <div style="width:1px;height:14px;background:#DCC9A8"></div>
-            <span style="font-family:Georgia,serif;font-size:1.05rem;font-weight:700;color:#8B6A3E">פרשת ${D.parasha}</span>
-          </div>
+
+      <!-- DATE + PARASHA -->
+      <div style="background:#fff;margin:16px;border-radius:16px;
+                  border:1px solid #D0DFF0;border-top:3px solid #1A6EBD;
+                  padding:18px;text-align:center;box-shadow:0 2px 8px rgba(26,110,189,.08)">
+        <div style="font-size:13px;color:#6A84A0;margin-bottom:6px" id="pc-greg-date"></div>
+        <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;
+                    color:#0D1B2E;margin-bottom:12px" id="pc-heb-date"></div>
+        <div style="display:inline-flex;align-items:center;gap:10px;
+                    background:#E8F2FB;border:1px solid #AACDE8;
+                    border-radius:50px;padding:8px 22px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.12em;
+                        color:#1A6EBD;text-transform:uppercase">פרשת השבוע</span>
+          <div style="width:1px;height:14px;background:#AACDE8"></div>
+          <span style="font-family:Georgia,serif;font-size:17px;
+                        font-weight:700;color:#1A6EBD">פרשת ${D.parasha}</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:#F7F6F2;border:1px solid #E2E0D8;border-radius:12px;margin-bottom:24px">
-          <div style="text-align:center;padding:14px 16px">
-            <div style="font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#B0ADA3;margin-bottom:6px">כניסת שבת</div>
-            <div style="font-family:Georgia,serif;font-size:2.4rem;color:#1A1916;letter-spacing:-.02em;direction:ltr;line-height:1">${D.entry}</div>
-          </div>
-          <div style="width:1px;height:52px;background:#E2E0D8"></div>
-          <div style="text-align:center;padding:14px 16px">
-            <div style="font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#B0ADA3;margin-bottom:6px">יציאת שבת</div>
-            <div style="font-family:Georgia,serif;font-size:2.4rem;color:#1A1916;letter-spacing:-.02em;direction:ltr;line-height:1">${D.exit}</div>
-          </div>
+      </div>
+
+      <!-- SHABBAT TIMES -->
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;
+                  align-items:center;margin:0 16px 16px;background:#fff;
+                  border:1px solid #D0DFF0;border-radius:16px;
+                  box-shadow:0 2px 8px rgba(26,110,189,.08)">
+        <div style="text-align:center;padding:16px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;
+                      text-transform:uppercase;color:#A0B4C8;margin-bottom:6px">כניסת שבת</div>
+          <div style="font-family:Georgia,serif;font-size:36px;color:#0D1B2E;
+                      letter-spacing:-.02em;direction:ltr;line-height:1">${D.entry}</div>
         </div>
-        <div style="font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#8A8778;margin-bottom:8px">לוח תפילות</div>
-        <div style="background:#F7F6F2;border:1px solid #E2E0D8;border-radius:12px;overflow:hidden;margin-bottom:20px">${prs}</div>
-        ${D.announcements.length?`<div style="font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#8A8778;margin-bottom:8px">הודעות</div>${ans}`:''}
-        ${D.torah?`
-          <div style="font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#8A8778;margin-bottom:8px;margin-top:20px">דבר תורה</div>
-          <div style="background:#F5EFE6;border:1px solid #DCC9A8;border-radius:12px;padding:18px 20px;font-family:Georgia,serif;font-size:.93rem;color:#4A4840;line-height:1.85;font-style:italic">${D.torah}</div>`:''}
-        <div style="text-align:center;margin-top:20px;font-size:.68rem;color:#B0ADA3;padding-top:16px;border-top:1px solid #E2E0D8">${D.nameEn} · שבת שלום</div>
+        <div style="width:1px;height:56px;background:#D0DFF0"></div>
+        <div style="text-align:center;padding:16px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;
+                      text-transform:uppercase;color:#A0B4C8;margin-bottom:6px">יציאת שבת</div>
+          <div style="font-family:Georgia,serif;font-size:36px;color:#0D1B2E;
+                      letter-spacing:-.02em;direction:ltr;line-height:1">${D.exit}</div>
+        </div>
+      </div>
+
+      <!-- PRAYERS -->
+      <div style="margin:0 16px 16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.16em;
+                    text-transform:uppercase;color:#1A6EBD;margin-bottom:8px;padding-right:4px">
+          לוח תפילות</div>
+        <div style="background:#fff;border:1px solid #D0DFF0;border-radius:16px;
+                    overflow:hidden;box-shadow:0 2px 8px rgba(26,110,189,.08)">
+          ${prs}
+        </div>
+      </div>
+
+      ${D.announcements.length?`
+      <!-- ANNOUNCEMENTS -->
+      <div style="margin:0 16px 16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.16em;
+                    text-transform:uppercase;color:#1A6EBD;margin-bottom:8px;padding-right:4px">
+          הודעות</div>
+        ${anns}
+      </div>`:''}
+
+      ${D.torah?`
+      <!-- TORAH -->
+      <div style="margin:0 16px 16px;background:#EDF7E6;border:1px solid #A8D98A;
+                  border-radius:16px;padding:18px 20px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.16em;
+                    text-transform:uppercase;color:#4EA830;margin-bottom:10px">דבר תורה</div>
+        <div style="font-family:Georgia,serif;font-size:14px;color:#2A4060;
+                    line-height:1.85;font-style:italic">${D.torah}</div>
+      </div>`:''}
+
+      <!-- FOOTER -->
+      <div style="text-align:center;padding:20px 16px 28px;
+                  border-top:1px solid #D0DFF0;margin-top:8px">
+        <div style="font-size:12px;color:#A0B4C8;letter-spacing:.06em">
+          ${D.nameHe} · קהילה מסורתית אורנית – צמרות</div>
       </div>
     </div>`;
+
+  // תאריך עברי בתמונה
+  try{
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('he-IL-u-ca-hebrew',{
+      year:'numeric',month:'long',day:'numeric'
+    }).formatToParts(now);
+    const dayNum = parseInt(parts.find(p=>p.type==='day')?.value||'0');
+    const month  = parts.find(p=>p.type==='month')?.value||'';
+    const yearNum= parseInt(parts.find(p=>p.type==='year')?.value||'0');
+    const el = document.getElementById('pc-heb-date');
+    if(el) el.textContent = `${numToHebrew(dayNum)} ב${month} ${numToHebrew(yearNum%1000)}`;
+    const gel = document.getElementById('pc-greg-date');
+    if(gel) gel.textContent = now.toLocaleDateString('he-IL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  }catch(e){}
 }
+
 
 async function exportPNG(){
   showToast('מכין תמונה...');
-  const c=await html2canvas(document.getElementById('pc'),{backgroundColor:'#fff',scale:2,useCORS:true,logging:false});
-  const a=document.createElement('a');a.download=`shabbat_${D.parasha.replace(/\s/g,'_')}.png`;a.href=c.toDataURL('image/png');a.click();
+  const el = document.getElementById('pc');
+  const c = await html2canvas(el,{
+    backgroundColor:'#F5F8FC',
+    scale:2,
+    useCORS:true,
+    logging:false,
+    width:390,
+    windowWidth:390,
+    scrollY:0,
+    scrollX:0,
+  });
+  const a=document.createElement('a');
+  a.download=`shabbat_${D.parasha.replace(/\s/g,'_')}.png`;
+  a.href=c.toDataURL('image/png');
+  a.click();
   showToast('✓ התמונה הורדה!');
 }
 
