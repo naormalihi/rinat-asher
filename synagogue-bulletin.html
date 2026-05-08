@@ -1035,7 +1035,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1128</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1458,38 +1458,61 @@ function buildPrint(){
 
 async function exportPNG(){
   showToast('מכין תמונה...');
-  // בנה מחדש את התוכן ממש לפני הצילום
+
+  // בנה את התוכן
   buildPrint();
   const el = document.getElementById('pc');
-  // המתן לרינדור מלא של ה-DOM
-  await new Promise(r => setTimeout(r, 800));
-  // וודא שכל התמונות נטענו
-  await Promise.all(
-    Array.from(el.querySelectorAll('img')).map(img =>
-      img.complete ? Promise.resolve() : new Promise(r=>{ img.onload=r; img.onerror=r; })
-    )
-  );
-  const c = await html2canvas(el,{
-    backgroundColor:'#F5F8FC',
-    scale:2,
-    useCORS:true,
-    allowTaint:true,
-    logging:false,
-    width:390,
-    windowWidth:390,
-    scrollY:-window.scrollY,
-    scrollX:0,
-    onclone:(doc)=>{
-      // וודא שכל האלמנטים גלויים במסמך המשובט
-      const cloned = doc.getElementById('pc');
-      if(cloned) cloned.style.display = 'block';
-    }
-  });
-  const a=document.createElement('a');
-  a.download=`shabbat_${D.parasha.replace(/\s/g,'_')}.png`;
-  a.href=c.toDataURL('image/png');
-  a.click();
-  showToast('✓ התמונה הורדה!');
+
+  // המתן שה-DOM יתרנדר לגמרי
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  await new Promise(r => setTimeout(r, 500));
+
+  // המתן לטעינת תמונות
+  const imgs = Array.from(el.querySelectorAll('img'));
+  await Promise.all(imgs.map(img => new Promise(r => {
+    if(img.complete && img.naturalWidth) { r(); return; }
+    img.onload = r; img.onerror = r;
+    setTimeout(r, 3000);
+  })));
+
+  // עוד המתנה קצרה לוודאות
+  await new Promise(r => setTimeout(r, 300));
+
+  try {
+    const c = await html2canvas(el, {
+      backgroundColor: '#F5F8FC',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      width: el.scrollWidth,
+      height: el.scrollHeight,
+      windowWidth: 390,
+      scrollX: 0,
+      scrollY: 0,
+      x: 0,
+      y: 0,
+      onclone: (clonedDoc) => {
+        const clonedEl = clonedDoc.getElementById('pc');
+        if (clonedEl) {
+          clonedEl.style.position = 'relative';
+          clonedEl.style.display = 'block';
+          clonedEl.style.overflow = 'visible';
+        }
+      }
+    });
+
+    const a = document.createElement('a');
+    a.download = `shabbat_${(D.parasha||'shabbat').replace(/\s/g,'_')}.png`;
+    a.href = c.toDataURL('image/png', 1.0);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✓ התמונה הורדה!');
+  } catch(e) {
+    console.error('Export error:', e);
+    showToast('❌ שגיאה בייצוא');
+  }
 }
 
 
