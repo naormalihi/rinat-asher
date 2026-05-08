@@ -240,7 +240,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       <button class="pill on" onclick="goScreen('pub')">לוח</button>
       <button class="pill" onclick="goAdmin()">ניהול</button>
     </div>
-    <div class="dot" id="fdot"></div>
+    <div id="fdot" title="מצב חיבור" style="display:flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--t3);cursor:default"><div class="dot" id="fdot-circle"></div><span id="fdot-label">מתחבר...</span></div>
   </div>
 </nav>
 
@@ -304,9 +304,24 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     <div class="ac" id="ac4">
       <div class="ac-hd" onclick="tog('ac4')"><div class="ac-hl"><div class="ac-ico">🔑</div><div class="ac-ttl">שינוי סיסמה</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
-        <div class="fld"><label class="flbl">סיסמה נוכחית</label><input class="finput" id="pw-cur" type="password" dir="ltr" placeholder="הזן סיסמה נוכחית"></div>
-        <div class="fld"><label class="flbl">סיסמה חדשה</label><input class="finput" id="pw-new" type="password" dir="ltr" placeholder="לפחות 6 תווים"></div>
-        <div class="fld"><label class="flbl">אימות סיסמה חדשה</label><input class="finput" id="pw-new2" type="password" dir="ltr" placeholder="הזן שוב"></div>
+        <div class="fld"><label class="flbl">סיסמה נוכחית</label>
+          <div style="position:relative">
+            <input class="finput" id="pw-cur" type="password" dir="ltr" placeholder="הזן סיסמה נוכחית" style="padding-left:40px">
+            <button type="button" onclick="togglePwdVis('pw-cur',this)" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;line-height:1">👁️</button>
+          </div>
+        </div>
+        <div class="fld"><label class="flbl">סיסמה חדשה</label>
+          <div style="position:relative">
+            <input class="finput" id="pw-new" type="password" dir="ltr" placeholder="לפחות 6 תווים" style="padding-left:40px">
+            <button type="button" onclick="togglePwdVis('pw-new',this)" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;line-height:1">👁️</button>
+          </div>
+        </div>
+        <div class="fld"><label class="flbl">אימות סיסמה חדשה</label>
+          <div style="position:relative">
+            <input class="finput" id="pw-new2" type="password" dir="ltr" placeholder="הזן שוב" style="padding-left:40px">
+            <button type="button" onclick="togglePwdVis('pw-new2',this)" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t3);font-size:1rem;padding:0;line-height:1">👁️</button>
+          </div>
+        </div>
         <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
           <button class="btn btn-a" onclick="changePwd()">🔑 שנה סיסמה</button>
           <div id="pwd-msg" style="font-size:.78rem;min-height:18px"></div>
@@ -372,9 +387,15 @@ async function boot(){
       const snap=await getDoc(ref);
       if(snap.exists()) D={...DEF,...snap.data()};
       onSnapshot(ref,s=>{if(s.exists()){D={...DEF,...s.data()};renderPub();}});
-      document.getElementById('fdot').classList.add('on');
+      document.getElementById('fdot-circle').classList.add('on');
+      document.getElementById('fdot-label').textContent='Firebase ✓';
+      document.getElementById('fdot-label').style.color='var(--green)';
     }catch(e){loadLocal();}
-  }else loadLocal();
+  }else{
+    loadLocal();
+    document.getElementById('fdot-label').textContent='מקומי בלבד';
+    document.getElementById('fdot-label').style.color='var(--t4)';
+  }
   if(D.pwd) PWD = D.pwd;
   renderPub();
   if(authed) fillAdm();
@@ -392,8 +413,14 @@ async function save(){
   btn.textContent='⏳ שומר...';btn.disabled=true;
   if(window._firebaseReady && window._db){
     const {doc,setDoc}=window._fsImports;
-    try{await setDoc(doc(window._db,'bulletin','main'),D);setSM('✓ נשמר ב-Firebase','ok');}
-    catch(e){localStorage.setItem('syn3',JSON.stringify(D));setSM('נשמר מקומית','err');}
+    try{await setDoc(doc(window._db,'bulletin','main'),D);setSM('✓ נשמר ב-Firebase','ok');
+      document.getElementById('fdot-circle').classList.add('on');
+      document.getElementById('fdot-label').textContent='Firebase ✓';
+      document.getElementById('fdot-label').style.color='var(--green)';}
+    catch(e){localStorage.setItem('syn3',JSON.stringify(D));setSM('נשמר מקומית','err');
+      document.getElementById('fdot-circle').classList.remove('on');
+      document.getElementById('fdot-label').textContent='מקומי בלבד';
+      document.getElementById('fdot-label').style.color='var(--t4)';}
   }else{localStorage.setItem('syn3',JSON.stringify(D));setSM('✓ נשמר מקומית','ok');}
   renderPub();
   showToast('✓ השינויים נשמרו');
@@ -586,6 +613,16 @@ async function changePwd(){
   showToast('✓ הסיסמה עודכנה!');
 }
 function tog(id){document.getElementById(id).classList.toggle('open');}
+function togglePwdVis(fieldId, btn){
+  const inp = document.getElementById(fieldId);
+  if(inp.type==='password'){
+    inp.type='text';
+    btn.textContent='🙈';
+  } else {
+    inp.type='password';
+    btn.textContent='👁️';
+  }
+}
 
 /* PRINT */
 function openPrint(){buildPrint();document.getElementById('pv').classList.add('on');}
