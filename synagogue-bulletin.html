@@ -372,6 +372,106 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 #pc{width:420px;margin:28px auto 60px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-lg);overflow:hidden}
 
 /* TOAST */
+/* ── GALLERY ── */
+.gallery-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  background:var(--subtle);
+  box-shadow:var(--sh-md);
+  margin-bottom:12px;
+}
+.gallery-slide{
+  position:absolute;inset:0;
+  opacity:0;
+  transition:opacity 0.8s ease;
+}
+.gallery-slide.active{opacity:1;}
+.gallery-slide img{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+.gallery-dots{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:2;
+}
+.gallery-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,0.5);
+  cursor:pointer;transition:all 0.2s;border:none;padding:0;
+}
+.gallery-dot.active{background:#fff;transform:scale(1.3);}
+.gallery-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;color:var(--t4);font-size:.85rem;gap:8px;
+}
+
+/* ── Admin Gallery Upload ── */
+.gallery-admin-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;
+}
+.gallery-admin-thumb{
+  position:relative;aspect-ratio:16/9;
+  border-radius:var(--r-sm);overflow:hidden;
+  background:var(--subtle);border:1px solid var(--border);
+}
+.gallery-admin-thumb img{width:100%;height:100%;object-fit:cover;}
+.gallery-admin-del{
+  position:absolute;top:4px;left:4px;
+  background:rgba(192,57,43,0.85);color:#fff;
+  border:none;border-radius:50%;width:22px;height:22px;
+  font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.gallery-upload-btn{
+  width:100%;padding:10px;
+  background:var(--blue-light);border:1.5px dashed var(--blue-border);
+  border-radius:var(--r-sm);color:var(--blue);
+  font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;
+  cursor:pointer;text-align:center;transition:all 0.2s;
+}
+.gallery-upload-btn:hover{background:var(--blue);color:#fff;}
+#gallery-file-input{display:none;}
+
+/* ── TICKER ── */
+.ticker-wrap{
+  overflow:hidden;
+  background:var(--blue);
+  border-radius:var(--r-sm);
+  margin-bottom:12px;
+  padding:10px 0;
+  position:relative;
+}
+.ticker-wrap::before,.ticker-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;
+}
+.ticker-wrap::before{right:0;background:linear-gradient(to left,var(--blue),transparent)}
+.ticker-wrap::after{left:0;background:linear-gradient(to right,var(--blue),transparent)}
+.ticker-track{
+  display:flex;
+  white-space:nowrap;
+  animation:ticker-scroll 18s linear infinite;
+  gap:60px;
+}
+.ticker-track:hover{animation-play-state:paused}
+.ticker-item{
+  font-size:.82rem;
+  color:#fff;
+  font-weight:500;
+  padding:0 8px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.ticker-sep{color:rgba(255,255,255,0.4);font-size:.7rem}
+@keyframes ticker-scroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--t1);color:#fff;padding:11px 22px;border-radius:50px;font-size:.82rem;font-weight:500;z-index:9998;box-shadow:var(--sh-lg);transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
 .toast.on{transform:translateX(-50%) translateY(0)}
 
@@ -418,7 +518,14 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     <div class="lmark">🔑</div>
     <div class="ltitle">כניסת מנהל</div>
     <div class="lsub">הזן סיסמה לגישה לעריכה</div>
-    <input type="password" class="linput" id="pw" placeholder="• • • • • • • •" onkeydown="if(event.key==='Enter')tryLogin()">
+    <div style="position:relative;margin-bottom:12px">
+      <input type="password" class="linput" id="pw" placeholder="• • • • • • • •"
+        onkeydown="if(event.key==='Enter')tryLogin()"
+        style="margin-bottom:0;padding-left:44px">
+      <button type="button" onclick="togglePwdVis('pw',this)"
+        style="position:absolute;left:12px;top:50%;transform:translateY(-50%);
+        background:none;border:none;cursor:pointer;font-size:1.1rem;padding:0;line-height:1">👁️</button>
+    </div>
     <button class="btn btn-p" style="width:100%;justify-content:center" onclick="tryLogin()">כניסה</button>
     <div class="lerr" id="perr"></div>
   </div>
@@ -480,7 +587,19 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       </div>
     </div>
 
-    <div class="ac" id="ac3">
+    <div class="ac" id="ac-gallery">
+      <div class="ac-hd" onclick="tog('ac-gallery')"><div class="ac-hl"><div class="ac-ico">🖼️</div><div class="ac-ttl">גלריית תמונות</div></div><span class="ac-chev">▼</span></div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div class="gallery-admin-grid" id="gallery-admin-grid"></div>
+        <input type="file" id="gallery-file-input" accept="image/*" multiple onchange="handleGalleryUpload(event)">
+        <button class="gallery-upload-btn" onclick="document.getElementById('gallery-file-input').click()">
+          📷 העלה תמונות (עד 10)
+        </button>
+        <div style="font-size:.72rem;color:var(--t4);margin-top:6px;text-align:center">תמונות מוצגות בלוח כגלריה מתחלפת כל 3 שניות</div>
+      </div>
+    </div>
+
+        <div class="ac" id="ac3">
       <div class="ac-hd" onclick="tog('ac3')"><div class="ac-hl"><div class="ac-ico">📜</div><div class="ac-ttl">דבר תורה</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
         <div class="fld"><label class="flbl">טקסט</label><textarea class="ftarea" id="fto" rows="5"></textarea></div>
@@ -518,7 +637,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
         <div class="abar" id="admin-abar">
       <button class="btn btn-p" onclick="save()">💾 שמור שינויים</button>
       <button class="btn btn-o" onclick="goScreen('pub')">👁️ תצוגה מקדימה</button>
-      <button class="btn btn-a" onclick="openPrint()">📤 ייצוא / שיתוף</button>
+      <button class="btn btn-a" onclick="openPrint()">📷 ייצוא PNG</button>
       <div style="flex:1"></div>
       <div class="smsg" id="smsg"></div>
       <button class="btn btn-gd" onclick="logout()">יציאה</button>
@@ -532,7 +651,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     <div class="ptop-lbl">תצוגת שיתוף / ייצוא</div>
     <div class="ptop-btns">
       <button class="btn btn-a" onclick="exportPNG()">📷 PNG</button>
-      <button class="btn btn-o" onclick="exportPDF()">📄 PDF</button>
+      
       <button class="btn btn-o" onclick="closePrint()">✕ סגור</button>
     </div>
   </div>
@@ -556,6 +675,7 @@ const DEF = {
     {title:'קידוש לאחר תפילת שחרית',body:'השבת לאחר התפילה יתקיים א"י"ה קידוש. תרומת משפחות גולדשטיין, לוי, שמולוביץ ושחר.'},
     {title:'חנוכת בית הכנסת',body:'אירוע חנוכת בית הכנסת והכנסת ספרי תורה חדשים!! ח׳ בתמוז, 23.6. רשמו לפניכם את התאריך!'},
   ],
+  images:[], // מערך של base64 תמונות
   torah:'בפרשתנו אנו פוגשים את מצוות השמיטה. "וְשָׁבְתָה הָאָרֶץ שַׁבָּת לַה׳". יהודי נדרש להפקיר את שדהו, לא לזרוע ולא לקצור, ולבטוח בבורא עולם שישלח לו מזון.',
   updatedAt:null
 };
@@ -585,6 +705,7 @@ async function boot(){
   }
   if(D.pwd) PWD = D.pwd;
   renderPub();
+  setTimeout(startGallery,200);
   if(authed) fillAdm();
   const ld=document.getElementById('ld');
   ld.classList.add('out');
@@ -616,6 +737,21 @@ async function save(){
 
 function setSM(t,c){const el=document.getElementById('smsg');el.textContent=t;el.className='smsg '+c;setTimeout(()=>{el.textContent='';el.className='smsg';},4000);}
 
+/* TICKER */
+function renderTicker(announcements){
+  const items = announcements.map(a =>
+    `<span class="ticker-item">
+      <span>📌</span>
+      <span>${a.title}</span>
+    </span>
+    <span class="ticker-sep">◆</span>`
+  ).join('');
+  // כפל פעמיים לאפקט אינסופי
+  return `<div class="ticker-wrap fu">
+    <div class="ticker-track">${items}${items}</div>
+  </div>`;
+}
+
 /* RENDER PUBLIC */
 function renderPub(){
   const prs=(D.prayers||[]).map((p,i)=>`
@@ -633,6 +769,7 @@ function renderPub(){
 
   const upd=D.updatedAt?new Date(D.updatedAt).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
 
+  _currentSlide=0;
   document.getElementById('pub').innerHTML=`
   <div style="max-width:560px;margin:0 auto;padding:32px 16px 64px">
     <div class="hero fu">
@@ -657,6 +794,7 @@ function renderPub(){
       </div>
     </div>
 
+    ${D.announcements.length ? renderTicker(D.announcements) : ''}
     <div class="shd fu"><span class="shd-t">לוח תפילות</span><div class="shd-l"></div></div>
     <div class="pc fu">${prs}</div>
 
@@ -668,6 +806,18 @@ function renderPub(){
       <div class="shd fu"><span class="shd-t">דבר תורה</span><div class="shd-l"></div></div>
       <div class="tc fu"><div class="tc-q">"</div><div class="tc-txt">${D.torah}</div></div>`:''}
 
+    ${(D.images||[]).length ? `
+      <div class="section-hd pub-fade" style="margin-top:20px"><span class="shd-t">גלריה</span><div class="shd-l"></div></div>
+      <div class="gallery-wrap pub-fade" id="pub-gallery">
+        ${(D.images||[]).map((img,i)=>`
+          <div class="gallery-slide ${i===0?'active':''}" data-idx="${i}">
+            <img src="${img}" alt="תמונה ${i+1}" loading="lazy">
+          </div>`).join('')}
+        <div class="gallery-dots">
+          ${(D.images||[]).map((_,i)=>`<button class="gallery-dot ${i===0?'active':''}" onclick="goSlide(${i})"></button>`).join('')}
+        </div>
+      </div>` : ''}
+
     <div class="pub-ft fu">
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
@@ -676,6 +826,10 @@ function renderPub(){
 }
 
 /* ADMIN FORM */
+function _afterRenderPub(){
+  setTimeout(()=>{ startGallery(); },100);
+}
+
 function fillAdm(){
   document.getElementById('fnh').value=D.nameHe||'';
   document.getElementById('fne').value=D.nameEn||'';
@@ -684,6 +838,7 @@ function fillAdm(){
   document.getElementById('fex').value=D.exit||'';
   document.getElementById('fto').value=D.torah||'';
   rPrl();rAnl();
+  renderGalleryAdmin();
 }
 function rPrl(){
   const container = document.getElementById('prl');
@@ -711,6 +866,66 @@ function rPrl(){
     else if(btn.dataset.action==='hl'){ D.prayers[idx].hl=!D.prayers[idx].hl; rPrl(); }
   });
 }
+/* ── GALLERY JS ── */
+let _galleryTimer = null;
+let _currentSlide = 0;
+
+function startGallery(){
+  clearInterval(_galleryTimer);
+  const slides = document.querySelectorAll('#pub-gallery .gallery-slide');
+  const dots = document.querySelectorAll('#pub-gallery .gallery-dot');
+  if(slides.length < 2) return;
+  _galleryTimer = setInterval(()=>{
+    _currentSlide = (_currentSlide + 1) % slides.length;
+    goSlide(_currentSlide);
+  }, 3000);
+}
+
+function goSlide(idx){
+  _currentSlide = idx;
+  document.querySelectorAll('#pub-gallery .gallery-slide').forEach((s,i)=>{
+    s.classList.toggle('active', i===idx);
+  });
+  document.querySelectorAll('#pub-gallery .gallery-dot').forEach((d,i)=>{
+    d.classList.toggle('active', i===idx);
+  });
+}
+
+function renderGalleryAdmin(){
+  const grid = document.getElementById('gallery-admin-grid');
+  if(!grid) return;
+  const imgs = D.images || [];
+  grid.innerHTML = imgs.map((img,i)=>`
+    <div class="gallery-admin-thumb">
+      <img src="${img}" alt="תמונה ${i+1}">
+      <button class="gallery-admin-del" onclick="deleteGalleryImg(${i})">✕</button>
+    </div>`).join('');
+}
+
+function deleteGalleryImg(idx){
+  D.images.splice(idx,1);
+  renderGalleryAdmin();
+}
+
+async function handleGalleryUpload(e){
+  const files = Array.from(e.target.files);
+  const remaining = 10 - (D.images||[]).length;
+  if(remaining <= 0){ showToast('הגעת למקסימום 10 תמונות'); return; }
+  const toAdd = files.slice(0, remaining);
+  for(const file of toAdd){
+    const b64 = await new Promise(res=>{
+      const reader = new FileReader();
+      reader.onload = ev => res(ev.target.result);
+      reader.readAsDataURL(file);
+    });
+    if(!D.images) D.images = [];
+    D.images.push(b64);
+  }
+  renderGalleryAdmin();
+  showToast(`✓ ${toAdd.length} תמונות נוספו`);
+  e.target.value = '';
+}
+
 function escH(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 function rAnl(){
   document.getElementById('anl').innerHTML=(D.announcements||[]).map((a,i)=>`
@@ -938,16 +1153,7 @@ async function exportPNG(){
   const a=document.createElement('a');a.download=`shabbat_${D.parasha.replace(/\s/g,'_')}.png`;a.href=c.toDataURL('image/png');a.click();
   showToast('✓ התמונה הורדה!');
 }
-async function exportPDF(){
-  showToast('מכין PDF...');
-  const c=await html2canvas(document.getElementById('pc'),{backgroundColor:'#fff',scale:2,useCORS:true});
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const w=pdf.internal.pageSize.getWidth();
-  pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,w,(c.height*w)/c.width);
-  pdf.save(`shabbat_${D.parasha.replace(/\s/g,'_')}.pdf`);
-  showToast('✓ PDF הורד!');
-}
+
 
 function showToast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2800);}
 
