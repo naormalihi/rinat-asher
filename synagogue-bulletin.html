@@ -1447,15 +1447,29 @@ function buildPrint(){
 async function exportPNG(){
   showToast('מכין תמונה...');
   const el = document.getElementById('pc');
+  // המתן לרינדור מלא של ה-DOM
+  await new Promise(r => setTimeout(r, 600));
+  // וודא שכל התמונות נטענו
+  await Promise.all(
+    Array.from(el.querySelectorAll('img')).map(img =>
+      img.complete ? Promise.resolve() : new Promise(r=>{ img.onload=r; img.onerror=r; })
+    )
+  );
   const c = await html2canvas(el,{
     backgroundColor:'#F5F8FC',
     scale:2,
     useCORS:true,
+    allowTaint:true,
     logging:false,
     width:390,
     windowWidth:390,
-    scrollY:0,
+    scrollY:-window.scrollY,
     scrollX:0,
+    onclone:(doc)=>{
+      // וודא שכל האלמנטים גלויים במסמך המשובט
+      const cloned = doc.getElementById('pc');
+      if(cloned) cloned.style.display = 'block';
+    }
   });
   const a=document.createElement('a');
   a.download=`shabbat_${D.parasha.replace(/\s/g,'_')}.png`;
