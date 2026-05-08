@@ -360,7 +360,7 @@ const DEF = {
 
 let D = JSON.parse(JSON.stringify(DEF));
 let authed = sessionStorage.getItem('adm')==='1';
-let PWD = localStorage.getItem('syn_pwd') || 'shabbat2024';
+let PWD = 'shabbat2024'; // נטען מ-Firebase אחרי boot
 const ICONS=['📌','📅','🕍','🎉','🙏','📖'];
 
 /* STORAGE */
@@ -375,6 +375,7 @@ async function boot(){
       document.getElementById('fdot').classList.add('on');
     }catch(e){loadLocal();}
   }else loadLocal();
+  if(D.pwd) PWD = D.pwd;
   renderPub();
   if(authed) fillAdm();
   const ld=document.getElementById('ld');
@@ -555,7 +556,7 @@ function tryLogin(){
   }
 }
 function logout(){authed=false;sessionStorage.removeItem('adm');goScreen('pub');showToast('יצאת בהצלחה');}
-function changePwd(){
+async function changePwd(){
   const cur=document.getElementById('pw-cur').value;
   const nw=document.getElementById('pw-new').value;
   const nw2=document.getElementById('pw-new2').value;
@@ -564,7 +565,18 @@ function changePwd(){
   if(nw.length<6){msg.style.color='#C0392B';msg.textContent='❌ הסיסמה חייבת להכיל לפחות 6 תווים';return;}
   if(nw!==nw2){msg.style.color='#C0392B';msg.textContent='❌ הסיסמאות אינן תואמות';return;}
   PWD=nw;
-  localStorage.setItem('syn_pwd',PWD);
+  D.pwd=nw;
+  // שמור ב-Firebase
+  if(window._firebaseReady && window._db){
+    const {doc,setDoc}=window._fsImports;
+    try{
+      await setDoc(doc(window._db,'bulletin','main'),D);
+    }catch(e){
+      localStorage.setItem('syn_pwd',PWD);
+    }
+  } else {
+    localStorage.setItem('syn_pwd',PWD);
+  }
   document.getElementById('pw-cur').value='';
   document.getElementById('pw-new').value='';
   document.getElementById('pw-new2').value='';
