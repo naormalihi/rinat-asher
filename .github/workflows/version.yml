@@ -3,8 +3,7 @@ name: Update Version
 on:
   push:
     branches: [main]
-    paths:
-      - 'synagogue-bulletin.html'
+  workflow_dispatch:
 
 jobs:
   update-version:
@@ -28,5 +27,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add synagogue-bulletin.html
-          git diff --staged --quiet || git commit -m "🔖 גרסה ${{ env.VERSION }}"
+          git diff --staged --quiet || git commit -m "🔖 גרסה $VERSION"
           git push
