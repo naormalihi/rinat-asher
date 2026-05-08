@@ -1035,7 +1035,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1131</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1382,16 +1382,17 @@ function buildPrint(){
         <div style="font-size:13px;color:#6A84A0;margin-bottom:6px">${_gregDate}</div>
         <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;
                     color:#0D1B2E;margin-bottom:12px">${_hebDate}</div>
-        <div style="text-align:center;margin-top:4px">
-          <div style="display:inline-flex;align-items:center;gap:10px;
-                      background:#E8F2FB;border:1px solid #AACDE8;
-                      border-radius:50px;padding:8px 22px">
+        <table style="margin:8px auto 0;border-collapse:collapse">
+          <tr><td style="background:#E8F2FB;border:1px solid #AACDE8;
+                         border-radius:50px;padding:8px 22px;white-space:nowrap;
+                         text-align:center">
             <span style="font-size:11px;font-weight:700;letter-spacing:.12em;
-                          color:#1A6EBD;text-transform:uppercase;white-space:nowrap">פרשת השבוע</span>
-            <div style="width:1px;height:14px;background:#AACDE8;flex-shrink:0"></div>
+                          color:#1A6EBD;text-transform:uppercase">פרשת השבוע</span>
+            <span style="color:#AACDE8;margin:0 8px">|</span>
             <span style="font-family:Georgia,serif;font-size:17px;
-                          font-weight:700;color:#1A6EBD;white-space:nowrap">${_parasha}</span>
-          </div>
+                          font-weight:700;color:#1A6EBD">${_parasha}</span>
+          </td></tr>
+        </table>
         </div>
       </div>
 
