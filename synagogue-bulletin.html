@@ -9,9 +9,13 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const firebaseConfig = {
-    apiKey: "PASTE_YOUR_API_KEY", authDomain: "PASTE_YOUR_AUTH_DOMAIN",
-    projectId: "PASTE_YOUR_PROJECT_ID", storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
-    messagingSenderId: "PASTE_YOUR_SENDER_ID", appId: "PASTE_YOUR_APP_ID"
+    apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
+    authDomain: "rinatasher-7131b.firebaseapp.com",
+    projectId: "rinatasher-7131b",
+    storageBucket: "rinatasher-7131b.firebasestorage.app",
+    messagingSenderId: "68262309246",
+    appId: "1:68262309246:web:0c21bb85c5e070525d572f",
+    measurementId: "G-W7CY1M1B9T"
   };
   let db = null, firebaseReady = false;
   try { const app = initializeApp(firebaseConfig); db = getFirestore(app); firebaseReady = true; } catch(e) {}
@@ -22,6 +26,13 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8B6A3E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="רינת אשר">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Frank+Ruhl+Libre:wght@300;400;700;900&display=swap" rel="stylesheet">
 
 <style>
@@ -596,5 +607,54 @@ setInterval(()=>{if(window._firebaseReady&&window._db)return;loadLocal();renderP
 document.addEventListener('firebaseReady',boot);
 setTimeout(()=>{if(!document.getElementById('ld').classList.contains('out')){window._firebaseReady=false;boot();}},1800);
 </script>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:8000;
+  background:#fff;border-top:1px solid #E2E0D8;padding:16px 20px;
+  box-shadow:0 -4px 20px rgba(0,0,0,.08);align-items:center;gap:14px">
+  <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0">
+  <div style="flex:1">
+    <div style="font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:.95rem;color:#1A1916">בית הכנסת רינת אשר</div>
+    <div style="font-size:.78rem;color:#8A8778;margin-top:2px">התקן כאפליקציה על המסך הבית</div>
+  </div>
+  <button onclick="installPWA()" style="background:#8B6A3E;color:#fff;border:none;border-radius:50px;
+    padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap">
+    התקן
+  </button>
+  <button onclick="document.getElementById('pwa-banner').style.display='none'" 
+    style="background:none;border:none;color:#B0ADA3;cursor:pointer;font-size:1.2rem;padding:4px;line-height:1">✕</button>
+</div>
+
+<script>
+// Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+// PWA Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const banner = document.getElementById('pwa-banner');
+  banner.style.display = 'flex';
+});
+
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    document.getElementById('pwa-banner').style.display = 'none';
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwa-banner').style.display = 'none';
+});
+</script>
+
 </body>
 </html>
