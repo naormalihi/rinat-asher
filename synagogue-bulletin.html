@@ -1310,7 +1310,10 @@ function togglePwdVis(fieldId, btn){
 }
 
 /* PRINT */
-function openPrint(){buildPrint();document.getElementById('pv').classList.add('on');}
+function openPrint(){
+  buildPrint();
+  document.getElementById('pv').classList.add('on');
+}
 function closePrint(){document.getElementById('pv').classList.remove('on');}
 
 function buildPrint(){
@@ -1327,6 +1330,13 @@ function buildPrint(){
     const _yearNum = parseInt(_parts.find(p=>p.type==='year')?.value||'0');
     _hebDate = `${numToHebrew(_dayNum)} ב${_month} ${numToHebrew(_yearNum%1000)}`;
   }catch(e){}
+
+  // שמור ערכים קריטיים לפני ה-template
+  const _parasha = D.parasha || '';
+  const _entry   = D.entry || '';
+  const _exit    = D.exit || '';
+  const _nameHe  = D.nameHe || '';
+  const _torah   = D.torah || '';
 
   const prs=(D.prayers||[]).map(p=>`
     <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;
@@ -1360,7 +1370,7 @@ function buildPrint(){
              style="height:52px;width:auto;margin-bottom:14px;display:block;margin-left:auto;margin-right:auto"
              onerror="this.style.display='none'">
         <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;
-                    color:#fff;margin-bottom:4px">${D.nameHe}</div>
+                    color:#fff;margin-bottom:4px">${_nameHe}</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.7);
                     letter-spacing:.08em">קהילה מסורתית אורנית – צמרות</div>
       </div>
@@ -1380,7 +1390,7 @@ function buildPrint(){
                           color:#1A6EBD;text-transform:uppercase;white-space:nowrap">פרשת השבוע</span>
             <div style="width:1px;height:14px;background:#AACDE8;flex-shrink:0"></div>
             <span style="font-family:Georgia,serif;font-size:17px;
-                          font-weight:700;color:#1A6EBD;white-space:nowrap">${D.parasha}</span>
+                          font-weight:700;color:#1A6EBD;white-space:nowrap">${_parasha}</span>
           </div>
         </div>
       </div>
@@ -1394,14 +1404,14 @@ function buildPrint(){
           <div style="font-size:11px;font-weight:700;letter-spacing:.14em;
                       text-transform:uppercase;color:#A0B4C8;margin-bottom:6px">כניסת שבת</div>
           <div style="font-family:Georgia,serif;font-size:36px;color:#0D1B2E;
-                      letter-spacing:-.02em;direction:ltr;line-height:1">${D.entry}</div>
+                      letter-spacing:-.02em;direction:ltr;line-height:1">${_entry}</div>
         </div>
         <div style="width:1px;height:56px;background:#D0DFF0"></div>
         <div style="text-align:center;padding:16px">
           <div style="font-size:11px;font-weight:700;letter-spacing:.14em;
                       text-transform:uppercase;color:#A0B4C8;margin-bottom:6px">יציאת שבת</div>
           <div style="font-family:Georgia,serif;font-size:36px;color:#0D1B2E;
-                      letter-spacing:-.02em;direction:ltr;line-height:1">${D.exit}</div>
+                      letter-spacing:-.02em;direction:ltr;line-height:1">${_exit}</div>
         </div>
       </div>
 
@@ -1416,7 +1426,7 @@ function buildPrint(){
         </div>
       </div>
 
-      ${D.announcements.length?`
+      ${D.announcements&&D.announcements.length?`
       <!-- ANNOUNCEMENTS -->
       <div style="margin:0 16px 16px">
         <div style="font-size:11px;font-weight:700;letter-spacing:.16em;
@@ -1425,7 +1435,7 @@ function buildPrint(){
         ${anns}
       </div>`:''}
 
-      ${D.torah?`
+      ${_torah?`
       <!-- TORAH -->
       <div style="margin:0 16px 16px;background:#EDF7E6;border:1px solid #A8D98A;
                   border-radius:16px;padding:18px 20px">
@@ -1439,7 +1449,7 @@ function buildPrint(){
       <div style="text-align:center;padding:20px 16px 28px;
                   border-top:1px solid #D0DFF0;margin-top:8px">
         <div style="font-size:12px;color:#A0B4C8;letter-spacing:.06em">
-          ${D.nameHe} · קהילה מסורתית אורנית – צמרות</div>
+          ${_nameHe} · קהילה מסורתית אורנית – צמרות</div>
       </div>
     </div>`;
 
@@ -1448,9 +1458,11 @@ function buildPrint(){
 
 async function exportPNG(){
   showToast('מכין תמונה...');
+  // בנה מחדש את התוכן ממש לפני הצילום
+  buildPrint();
   const el = document.getElementById('pc');
   // המתן לרינדור מלא של ה-DOM
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 800));
   // וודא שכל התמונות נטענו
   await Promise.all(
     Array.from(el.querySelectorAll('img')).map(img =>
