@@ -287,7 +287,20 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       </div>
     </div>
 
-    <div class="abar">
+    <div class="ac" id="ac4">
+      <div class="ac-hd" onclick="tog('ac4')"><div class="ac-hl"><div class="ac-ico">🔑</div><div class="ac-ttl">שינוי סיסמה</div></div><span class="ac-chev">▼</span></div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div class="fld"><label class="flbl">סיסמה נוכחית</label><input class="finput" id="pw-cur" type="password" dir="ltr" placeholder="הזן סיסמה נוכחית"></div>
+        <div class="fld"><label class="flbl">סיסמה חדשה</label><input class="finput" id="pw-new" type="password" dir="ltr" placeholder="לפחות 6 תווים"></div>
+        <div class="fld"><label class="flbl">אימות סיסמה חדשה</label><input class="finput" id="pw-new2" type="password" dir="ltr" placeholder="הזן שוב"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+          <button class="btn btn-a" onclick="changePwd()">🔑 שנה סיסמה</button>
+          <div id="pwd-msg" style="font-size:.78rem;min-height:18px"></div>
+        </div>
+      </div>
+    </div>
+
+        <div class="abar">
       <button class="btn btn-p" onclick="save()">💾 שמור שינויים</button>
       <button class="btn btn-o" onclick="goScreen('pub')">👁️ תצוגה מקדימה</button>
       <button class="btn btn-a" onclick="openPrint()">📤 ייצוא / שיתוף</button>
@@ -333,7 +346,7 @@ const DEF = {
 
 let D = JSON.parse(JSON.stringify(DEF));
 let authed = sessionStorage.getItem('adm')==='1';
-const PWD='shabbat2024';
+let PWD = localStorage.getItem('syn_pwd') || 'shabbat2024';
 const ICONS=['📌','📅','🕍','🎉','🙏','📖'];
 
 /* STORAGE */
@@ -453,16 +466,16 @@ function rPrl(){
       <button class="prw-hl ${p.hl?'on':''}" data-action="hl" data-i="${i}">★</button>
       <button class="prw-del" data-action="del" data-i="${i}" title="מחק">✕</button>
     </div>`).join('');
-  // single delegated listener
-  container.onclick = null;
-  container.oninput = null;
-  container.addEventListener('input', e=>{
+  // re-clone container to wipe all old listeners
+  const fresh = container.cloneNode(false);
+  fresh.innerHTML = container.innerHTML;
+  container.parentNode.replaceChild(fresh, container);
+  fresh.addEventListener('input', e=>{
     const inp = e.target.closest('input[data-field]');
     if(!inp) return;
-    const idx = +inp.dataset.i;
-    D.prayers[idx][inp.dataset.field] = inp.value;
+    D.prayers[+inp.dataset.i][inp.dataset.field] = inp.value;
   });
-  container.addEventListener('click', e=>{
+  fresh.addEventListener('click', e=>{
     const btn = e.target.closest('button[data-action]');
     if(!btn) return;
     const idx = +btn.dataset.i;
@@ -528,6 +541,24 @@ function tryLogin(){
   }
 }
 function logout(){authed=false;sessionStorage.removeItem('adm');goScreen('pub');showToast('יצאת בהצלחה');}
+function changePwd(){
+  const cur=document.getElementById('pw-cur').value;
+  const nw=document.getElementById('pw-new').value;
+  const nw2=document.getElementById('pw-new2').value;
+  const msg=document.getElementById('pwd-msg');
+  if(cur!==PWD){msg.style.color='#C0392B';msg.textContent='❌ הסיסמה הנוכחית שגויה';return;}
+  if(nw.length<6){msg.style.color='#C0392B';msg.textContent='❌ הסיסמה חייבת להכיל לפחות 6 תווים';return;}
+  if(nw!==nw2){msg.style.color='#C0392B';msg.textContent='❌ הסיסמאות אינן תואמות';return;}
+  PWD=nw;
+  localStorage.setItem('syn_pwd',PWD);
+  document.getElementById('pw-cur').value='';
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-new2').value='';
+  msg.style.color='#4A7C59';
+  msg.textContent='✓ הסיסמה שונתה בהצלחה';
+  setTimeout(()=>msg.textContent='',3000);
+  showToast('✓ הסיסמה עודכנה!');
+}
 function tog(id){document.getElementById(id).classList.toggle('open');}
 
 /* PRINT */
