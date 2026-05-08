@@ -240,7 +240,18 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       <button class="pill on" onclick="goScreen('pub')">לוח</button>
       <button class="pill" onclick="goAdmin()">ניהול</button>
     </div>
-    <div id="fdot" title="מצב חיבור" style="display:flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--t3);cursor:default"><div class="dot" id="fdot-circle"></div><span id="fdot-label">מתחבר...</span></div>
+    <div style="position:relative;display:inline-flex;align-items:center" id="fdot-wrap"
+  onmouseenter="document.getElementById('fdot-tip').style.display='block'"
+  onmouseleave="document.getElementById('fdot-tip').style.display='none'">
+  <div class="dot" id="fdot-circle" style="cursor:pointer"></div>
+  <div id="fdot-tip" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+    background:var(--t1);color:#fff;font-size:0.72rem;padding:6px 12px;border-radius:8px;
+    white-space:nowrap;z-index:999;box-shadow:var(--sh-md);pointer-events:none">
+    <span id="fdot-label">מתחבר לענן...</span>
+    <div style="position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+      width:8px;height:8px;background:var(--t1);rotate:45deg"></div>
+  </div>
+</div>
   </div>
 </nav>
 
