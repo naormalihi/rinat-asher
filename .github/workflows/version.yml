@@ -1,0 +1,27 @@
+name: Update Version
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'synagogue-bulletin.html'
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update version timestamp
+        run: |
+          VERSION="v$(date +'%Y.%m.%d.%H%M' -u)"
+          echo "Setting version: $VERSION"
+          sed -i "s/v[0-9]\{4\}\.[0-9]\{2\}\.[0-9]\{2\}\.[0-9]\{4\}/$VERSION/g" synagogue-bulletin.html
+
+      - name: Commit version update
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add synagogue-bulletin.html
+          git diff --staged --quiet || git commit -m "🔖 Auto version update"
+          git push
