@@ -1,13 +1,6 @@
-const CACHE = 'rinat-asher-v1';
-const ASSETS = [
-  '/rinat-asher/synagogue-bulletin.html',
-  '/rinat-asher/manifest.json'
-];
+const CACHE = 'rinat-asher-v2026.05.08.1114';
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
-  );
   self.skipWaiting();
 });
 
@@ -15,9 +8,10 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
+     .then(() => self.clients.matchAll())
+     .then(clients => clients.forEach(c => c.postMessage('reload')))
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {

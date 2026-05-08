@@ -1035,7 +1035,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1135</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1546,7 +1546,15 @@ setTimeout(()=>{if(!document.getElementById('ld').classList.contains('out')){win
 // Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // האזן לעדכון גרסה
+      navigator.serviceWorker.addEventListener('message', e => {
+        if(e.data === 'reload') {
+          showToast('🔄 גרסה חדשה זמינה – מרענן...');
+          setTimeout(() => window.location.reload(true), 1500);
+        }
+      });
+    }).catch(()=>{});
   });
 }
 
