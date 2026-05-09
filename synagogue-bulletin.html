@@ -1286,7 +1286,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2127</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1950,20 +1950,25 @@ function renderRoles(idx){
 
     document.getElementById('roles-content').innerHTML = `
       ${dl}
-      <div class="roles-week-card">
-        <div class="roles-week-header">
-          <div class="roles-week-title">${next.label}</div>
-          <div class="roles-week-date">${_currentShabbatIdx===0?'שבת הקרובה':'שבת מתוכננת'}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- עמודת חזנים -->
+        <div class="prayers-card" style="border-radius:var(--r-lg);overflow:hidden">
+          <div style="background:linear-gradient(135deg,var(--blue),var(--blue-mid));
+                      color:#fff;padding:12px 16px">
+            <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;opacity:.8;margin-bottom:2px">חזנים ותפקידים</div>
+            <div style="font-family:'Frank Ruhl Libre',serif;font-size:1rem;font-weight:700">${next.label}</div>
+          </div>
+          ${CHAZAN_ROLES_PUB.map(r=>mkRow(r.label,r.key,false)).join('')}
         </div>
-        ${mkRow('חזן שחרית','chazan_shacharit')}
-        ${mkRow('חזן מנחה','chazan_mincha')}
-        ${mkRow('פתיחת ארון','petichat_aron')}
-        ${mkRow('הגבהה ספר ראשון','hagbaha1')}
-        ${mkRow('הגבהה ספר שני','hagbaha2')}
-        ${mkRow('הולכה ספר ראשון','holicha1')}
-        ${mkRow('הולכה ספר שני','holicha2')}
-        ${mkRow('קורא בתורה','reader')}
-        ${ALIYOT_NAMES.map(a=>mkRow(a,'aliya_'+a,true)).join('')}
+        <!-- עמודת עליות -->
+        <div class="prayers-card" style="border-radius:var(--r-lg);overflow:hidden">
+          <div style="background:linear-gradient(135deg,var(--grn),#5DBF38);
+                      color:#fff;padding:12px 16px">
+            <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;opacity:.8;margin-bottom:2px">עליות לתורה</div>
+            <div style="font-family:'Frank Ruhl Libre',serif;font-size:1rem;font-weight:700">${next.label}</div>
+          </div>
+          ${ALIYOT_NAMES.map(a=>mkRow(a,'aliya_'+a,true)).join('')}
+        </div>
       </div>
 
 
@@ -1997,26 +2002,24 @@ let committeesData = [];
 function renderCommittees(){
   document.getElementById('committees-content').innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
   loadAllData().then(()=>{
-    const isAdm = authed;
     if(!committeesData.length){
       document.getElementById('committees-content').innerHTML = `
         <div style="text-align:center;padding:48px;color:var(--t4)">
           <div style="font-size:2.5rem;margin-bottom:12px">👥</div>
-          <div>אין ועדות עדיין</div>
-          ${isAdm?`<button class="btn btn-p" style="margin-top:16px" onclick="openAddCommittee()">＋ הוסף ועדה</button>`:''}
+          <div style="font-size:.9rem">אין ועדות עדיין</div>
         </div>`;
       return;
     }
 
+    // תצוגה ציבורית – כרטיסיות בלבד, ללא עריכה
     const cards = committeesData.map(c=>{
       const members = (c.members||[]).map(m=>{
-        const mb = membersData.find(x=>x.id===m.memberId)||{name:m.memberId};
+        const mb = membersData.find(x=>x.id===m.memberId)||{name:m.memberId||'?'};
         const ini = mb.name.split(' ').map(n=>n[0]).join('').slice(0,2);
         return `<div class="comm-member-row">
           <div class="comm-member-avatar">${ini}</div>
           <div class="comm-member-name">${mb.name}</div>
           <div class="comm-member-role">${m.role||'חבר'}</div>
-
         </div>`;
       }).join('');
 
@@ -2027,14 +2030,11 @@ function renderCommittees(){
         <div class="comm-count">👤 ${(c.members||[]).length} חברים</div>
         <div class="comm-members" onclick="event.stopPropagation()">
           ${members||'<div style="color:var(--t4);font-size:.82rem;padding:8px 0">אין חברים עדיין</div>'}
-
         </div>
       </div>`;
     }).join('');
 
-    document.getElementById('committees-content').innerHTML = `
-      ${isAdm?`<button class="btn btn-p" style="margin-bottom:16px" onclick="openAddCommittee()">＋ הוסף ועדה</button>`:''}
-      <div class="comm-grid">${cards}</div>`;
+    document.getElementById('committees-content').innerHTML = `<div class="comm-grid">${cards}</div>`;
   });
 }
 
@@ -2069,7 +2069,11 @@ async function removeCommMember(commId, memberId){
   if(!comm) return;
   comm.members = (comm.members||[]).filter(m=>m.memberId!==memberId);
   const ok = await _saveCommToFirebase(comm);
-  if(ok){ showToast('✓ חבר הוסר'); renderCommittees(); }
+  if(ok){
+    showToast('✓ חבר הוסר');
+    renderCommittees();
+    loadCommitteesAdmin();
+  }
 }
 
 async function deleteCommittee(commId){
@@ -2266,37 +2270,43 @@ async function loadRolesAdmin(weekOffset){
     if(!el) return;
 
     const ALIYOT_NAMES = ['כהן','לוי','ישראל','רביעי','חמישי','שישי','שביעי','מפטיר'];
-    const ALL_ROLES = [
+    const CHAZAN_ROLES = [
       {key:'chazan_shacharit', label:'חזן שחרית'},
       {key:'chazan_mincha', label:'חזן מנחה'},
       {key:'petichat_aron', label:'פתיחת ארון'},
       {key:'hagbaha1', label:'הגבהה ספר ראשון'},
       {key:'hagbaha2', label:'הגבהה ספר שני'},
+      {key:'golel1', label:'גולל ספר ראשון'},
+      {key:'golel2', label:'גולל ספר שני'},
       {key:'holicha1', label:'הולכה ספר ראשון'},
       {key:'holicha2', label:'הולכה ספר שני'},
       {key:'reader', label:'קורא בתורה'},
-      ...ALIYOT_NAMES.map(a=>({key:'aliya_'+a, label:a}))
     ];
+    const ALIYA_ROLES = ALIYOT_NAMES.map(a=>({key:'aliya_'+a, label:a}));
+    const ALL_ROLES = [...CHAZAN_ROLES, ...ALIYA_ROLES];
 
     const dl = `<datalist id="members-dl-admin">
       ${membersData.map(m=>`<option value="${m.name}">`).join('')}
     </datalist>`;
 
-    const rows = ALL_ROLES.map(r=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:.72rem;font-weight:700;color:var(--blue);
-          min-width:90px;flex-shrink:0;line-height:1.3">${r.label}</span>
+    const mkAdminRow = r => `
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.7rem;font-weight:700;color:var(--blue);
+          min-width:70px;flex-shrink:0;line-height:1.3">${r.label}</span>
         <input type="text" value="${sd[r.key]||''}" placeholder="שם..."
           data-date="${s.key}" data-key="${r.key}"
           list="members-dl-admin"
-          style="flex:1;background:var(--subtle);border:1px solid var(--border);
-          border-radius:6px;padding:6px 8px;font-family:'DM Sans',sans-serif;
-          font-size:.82rem;color:var(--t1);outline:none;direction:rtl;min-width:0">
+          style="flex:1;background:var(--card);border:1px solid var(--border);
+          border-radius:6px;padding:5px 6px;font-family:'DM Sans',sans-serif;
+          font-size:.8rem;color:var(--t1);outline:none;direction:rtl;min-width:0">
         <button onclick="openSmartAssign('${s.key}','${r.key}','${r.label}')"
           style="background:var(--blue);color:#fff;border:none;border-radius:50px;
-          font-size:.68rem;font-weight:700;padding:5px 12px;cursor:pointer;
-          white-space:nowrap;flex-shrink:0">⚡ שבץ</button>
-      </div>`).join('');
+          font-size:.65rem;font-weight:700;padding:4px 8px;cursor:pointer;
+          white-space:nowrap;flex-shrink:0">⚡</button>
+      </div>`;
+
+    const chazanRows = CHAZAN_ROLES.map(mkAdminRow).join('');
+    const aliyaRows  = ALIYA_ROLES.map(r => mkAdminRow({...r, isAliya:true})).join('');
 
     el.innerHTML = `
       ${dl}
@@ -2312,15 +2322,24 @@ async function loadRolesAdmin(weekOffset){
         <button class="btn btn-a" style="font-size:.75rem;padding:5px 12px"
           onclick="loadRolesAdmin(${weekOffset+1})">הבאה →</button>
       </div>
-      <!-- שורות שיבוץ -->
-      <div style="background:var(--subtle);border:1px solid var(--border);
-                  border-radius:var(--r-md);padding:8px 14px">
-        ${rows}
+      <!-- 2 עמודות -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- ימין: חזנים -->
+        <div style="background:var(--subtle);border:1px solid var(--border);border-radius:var(--r-md);padding:8px 10px">
+          <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+                      color:var(--blue);margin-bottom:6px">חזנים ותפקידים</div>
+          ${chazanRows}
+        </div>
+        <!-- שמאל: עליות -->
+        <div style="background:var(--subtle);border:1px solid var(--grn-border);border-radius:var(--r-md);padding:8px 10px">
+          <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+                      color:var(--grn);margin-bottom:6px">עליות לתורה</div>
+          ${aliyaRows}
+        </div>
       </div>
-      <!-- כפתור שמירה -->
+      <!-- כפתורי פעולה -->
       <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:10px"
         onclick="saveRolesAdmin('${s.key}')">💾 שמור שיבוצים – ${s.label}</button>
-      <!-- כפתור ייצוא -->
       <button class="btn btn-o" style="width:100%;justify-content:center;margin-top:6px"
         onclick="exportRolesPNG()">📷 ייצוא PNG</button>
     `;
@@ -2404,14 +2423,24 @@ async function loadCommitteesAdmin(){
 
 async function addCommMemberAdmin(commId){
   const sel = document.getElementById('cadds-'+commId);
-  if(!sel?.value){showToast('בחר חבר');return;}
+  if(!sel || !sel.value){ showToast('בחר חבר תחילה'); return; }
+  const memberId = sel.value;
+  // מצא שם החבר
+  const member = membersData.find(m=>m.id===memberId);
+  if(!member){ showToast('חבר לא נמצא במאגר'); return; }
   const comm = committeesData.find(c=>c.id===commId);
   if(!comm) return;
-  if(!comm.members) comm.members=[];
-  if(comm.members.find(m=>m.memberId===sel.value)){showToast('החבר כבר בוועדה');return;}
-  comm.members.push({memberId:sel.value, role:'חבר'});
+  if(!comm.members) comm.members = [];
+  if(comm.members.find(m=>m.memberId===memberId)){
+    showToast('החבר כבר בוועדה זו'); return;
+  }
+  comm.members.push({ memberId, name: member.name, role: 'חבר' });
   const ok = await _saveCommToFirebase(comm);
-  if(ok){ showToast('✓ חבר נוסף'); loadCommitteesAdmin(); }
+  if(ok){
+    showToast(`✓ ${member.name} נוסף לוועדה`);
+    loadCommitteesAdmin();
+    renderCommittees(); // עדכן גם תצוגה ציבורית
+  }
 }
 
 /* ════════════════════════════
