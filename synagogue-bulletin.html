@@ -1286,7 +1286,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2210</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1931,55 +1931,69 @@ let _currentShabbatIdx = 0;
 
 function renderRoles(idx){
   if(idx !== undefined) _currentShabbatIdx = idx;
-  document.getElementById('roles-content').innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
-  loadAllData().then(()=>{
+  const el = document.getElementById('roles-content');
+  if(!el) return;
+  el.innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
+
+  const draw = () => {
     const shabbatot = getNextShabbatot(8);
     const next = shabbatot[_currentShabbatIdx];
     const nd = rolesData[next.key] || {};
-    // תצוגה ציבורית – קריאה בלבד, ללא שיבוץ
 
-    const mkRow = (label, key, isAliya=false) => `
+    const CHAZAN_LIST = [
+      {key:'chazan_shacharit', label:'חזן שחרית'},
+      {key:'chazan_mincha', label:'חזן מנחה'},
+      {key:'petichat_aron', label:'פתיחת ארון'},
+      {key:'hagbaha1', label:'הגבהה ספר א׳'},
+      {key:'hagbaha2', label:'הגבהה ספר ב׳'},
+      {key:'golel1', label:'גולל ספר א׳'},
+      {key:'golel2', label:'גולל ספר ב׳'},
+      {key:'holicha1', label:'הולכה ספר א׳'},
+      {key:'holicha2', label:'הולכה ספר ב׳'},
+      {key:'reader', label:'קורא בתורה'},
+    ];
+    const ALIYA_LIST = ['כהן','לוי','ישראל','רביעי','חמישי','שישי','שביעי','מפטיר']
+      .map(a=>({key:'aliya_'+a, label:a}));
+
+    const row = (label, key, green=false) => `
       <div class="role-row">
-        <span class="role-badge${isAliya?' aliya':''}">${label}</span>
-        <span class="${nd[key]?'role-name':'role-empty'}" style="flex:1">${getMemberName(nd[key])||'לא שובץ'}</span>
+        <span class="role-badge${green?' aliya':''}">${label}</span>
+        <span class="${nd[key]?'role-name':'role-empty'}">${getMemberName(nd[key])||'לא שובץ'}</span>
       </div>`;
 
-    const dl = `<datalist id="members-dl">${membersData.map(m=>`<option value="${m.name}">`).join('')}</datalist>`;
-
-
-
-    document.getElementById('roles-content').innerHTML = `
-      ${dl}
+    el.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <!-- עמודת חזנים -->
-        <div class="prayers-card" style="border-radius:var(--r-lg);overflow:hidden">
-          <div style="background:linear-gradient(135deg,var(--blue),var(--blue-mid));
-                      color:#fff;padding:12px 16px">
-            <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;opacity:.8;margin-bottom:2px">חזנים ותפקידים</div>
-            <div style="font-family:'Frank Ruhl Libre',serif;font-size:1rem;font-weight:700">${next.label}</div>
+        <div class="prayers-card">
+          <div style="background:linear-gradient(135deg,var(--blue),var(--blue-mid));color:#fff;padding:12px 16px">
+            <div style="font-size:.68rem;opacity:.8;margin-bottom:2px">חזנים ותפקידים</div>
+            <div style="font-family:'Frank Ruhl Libre',serif;font-size:.95rem;font-weight:700">${next.label}</div>
           </div>
-          ${CHAZAN_ROLES_PUB.map(r=>mkRow(r.label,r.key,false)).join('')}
+          ${CHAZAN_LIST.map(r=>row(r.label,r.key)).join('')}
         </div>
-        <!-- עמודת עליות -->
-        <div class="prayers-card" style="border-radius:var(--r-lg);overflow:hidden">
-          <div style="background:linear-gradient(135deg,var(--grn),#5DBF38);
-                      color:#fff;padding:12px 16px">
-            <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;opacity:.8;margin-bottom:2px">עליות לתורה</div>
-            <div style="font-family:'Frank Ruhl Libre',serif;font-size:1rem;font-weight:700">${next.label}</div>
+        <div class="prayers-card">
+          <div style="background:linear-gradient(135deg,var(--grn),#5DBF38);color:#fff;padding:12px 16px">
+            <div style="font-size:.68rem;opacity:.8;margin-bottom:2px">עליות לתורה</div>
+            <div style="font-family:'Frank Ruhl Libre',serif;font-size:.95rem;font-weight:700">${next.label}</div>
           </div>
-          ${ALIYOT_NAMES.map(a=>mkRow(a,'aliya_'+a,true)).join('')}
+          ${ALIYA_LIST.map(r=>row(r.label,r.key,true)).join('')}
         </div>
-      </div>
+      </div>`;
+  };
 
-
-`;
-  });
-}
-
-function saveCurrentShabbat(){
-  const shabbatot = getNextShabbatot(8);
-  const current = shabbatot[_currentShabbatIdx];
-  saveRoles(current.key);
+  if(window._firebaseReady && window._db){
+    const {collection, getDocs} = window._fsImports;
+    Promise.all([
+      getDocs(collection(window._db,'members')),
+      getDocs(collection(window._db,'shabbat_roles'))
+    ]).then(([mSnap, rSnap])=>{
+      membersData = mSnap.docs.map(d=>({id:d.id,...d.data()}));
+      rolesData = {};
+      rSnap.docs.forEach(d=>{ rolesData[d.id] = d.data(); });
+      draw();
+    }).catch(e=>{ console.error(e); draw(); });
+  } else {
+    draw();
+  }
 }
 
 async function saveRoles(dateKey){
@@ -2003,20 +2017,18 @@ function renderCommittees(){
   const el = document.getElementById('committees-content');
   if(!el) return;
   el.innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
-  // טעינה ישירה מ-Firebase
-  const doRender = () => {
-    if(!committeesData || !committeesData.length){
-      el.innerHTML = `
-        <div style="text-align:center;padding:48px;color:var(--t4)">
-          <div style="font-size:2.5rem;margin-bottom:12px">👥</div>
-          <div style="font-size:.9rem">אין ועדות עדיין</div>
-        </div>`;
+
+  const draw = () => {
+    if(!committeesData.length){
+      el.innerHTML = `<div style="text-align:center;padding:48px;color:var(--t4)">
+        <div style="font-size:2.5rem;margin-bottom:12px">👥</div>
+        <div style="font-size:.9rem">אין ועדות עדיין</div>
+      </div>`;
       return;
     }
-
     const cards = committeesData.map(c=>{
       const members = (c.members||[]).map(m=>{
-        const mb = membersData.find(x=>x.id===m.memberId) || {name: m.name || m.memberId || '?'};
+        const mb = membersData.find(x=>x.id===m.memberId)||{name:m.name||m.memberId||'?'};
         const ini = (mb.name||'?').split(' ').map(n=>n[0]).join('').slice(0,2);
         return `<div class="comm-member-row">
           <div class="comm-member-avatar">${ini}</div>
@@ -2024,7 +2036,6 @@ function renderCommittees(){
           <div class="comm-member-role">${m.role||'חבר'}</div>
         </div>`;
       }).join('');
-
       return `<div class="comm-card" id="cc-${c.id}" onclick="toggleComm('${c.id}')">
         <div class="comm-icon">${c.icon||'⭐'}</div>
         <div class="comm-name">${c.name}</div>
@@ -2035,11 +2046,10 @@ function renderCommittees(){
         </div>
       </div>`;
     }).join('');
-
     el.innerHTML = `<div class="comm-grid">${cards}</div>`;
   };
 
-  if(window._firebaseReady && window._db && !committeesData.length){
+  if(window._firebaseReady && window._db){
     const {collection, getDocs} = window._fsImports;
     Promise.all([
       getDocs(collection(window._db,'members')),
@@ -2047,10 +2057,10 @@ function renderCommittees(){
     ]).then(([mSnap, cSnap])=>{
       membersData = mSnap.docs.map(d=>({id:d.id,...d.data()}));
       committeesData = cSnap.docs.map(d=>({id:d.id,...d.data()}));
-      doRender();
-    }).catch(e=>{ console.error(e); doRender(); });
+      draw();
+    }).catch(e=>{ console.error(e); draw(); });
   } else {
-    doRender();
+    draw();
   }
 }
 
