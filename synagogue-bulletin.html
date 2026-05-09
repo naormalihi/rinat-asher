@@ -1286,7 +1286,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2202</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1931,8 +1931,11 @@ let _currentShabbatIdx = 0;
 
 function renderRoles(idx){
   if(idx !== undefined) _currentShabbatIdx = idx;
-  document.getElementById('roles-content').innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
-  loadAllData().then(()=>{
+  const el = document.getElementById('roles-content');
+  if(!el) return;
+  el.innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
+
+  const _doRenderRoles = () => {
     const shabbatot = getNextShabbatot(8);
     const next = shabbatot[_currentShabbatIdx];
     const nd = rolesData[next.key] || {};
@@ -1948,7 +1951,7 @@ function renderRoles(idx){
 
 
 
-    document.getElementById('roles-content').innerHTML = `
+    el.innerHTML = `
       ${dl}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <!-- עמודת חזנים -->
