@@ -1286,7 +1286,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2136</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2000,10 +2000,12 @@ async function saveRoles(dateKey){
 let committeesData = [];
 
 function renderCommittees(){
-  document.getElementById('committees-content').innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
+  const el = document.getElementById('committees-content');
+  if(!el) return;
+  el.innerHTML = '<div class="loader-ring" style="margin:40px auto"></div>';
   loadAllData().then(()=>{
-    if(!committeesData.length){
-      document.getElementById('committees-content').innerHTML = `
+    if(!committeesData || !committeesData.length){
+      el.innerHTML = `
         <div style="text-align:center;padding:48px;color:var(--t4)">
           <div style="font-size:2.5rem;margin-bottom:12px">👥</div>
           <div style="font-size:.9rem">אין ועדות עדיין</div>
@@ -2011,11 +2013,10 @@ function renderCommittees(){
       return;
     }
 
-    // תצוגה ציבורית – כרטיסיות בלבד, ללא עריכה
     const cards = committeesData.map(c=>{
       const members = (c.members||[]).map(m=>{
-        const mb = membersData.find(x=>x.id===m.memberId)||{name:m.memberId||'?'};
-        const ini = mb.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+        const mb = membersData.find(x=>x.id===m.memberId) || {name: m.name || m.memberId || '?'};
+        const ini = (mb.name||'?').split(' ').map(n=>n[0]).join('').slice(0,2);
         return `<div class="comm-member-row">
           <div class="comm-member-avatar">${ini}</div>
           <div class="comm-member-name">${mb.name}</div>
@@ -2026,7 +2027,7 @@ function renderCommittees(){
       return `<div class="comm-card" id="cc-${c.id}" onclick="toggleComm('${c.id}')">
         <div class="comm-icon">${c.icon||'⭐'}</div>
         <div class="comm-name">${c.name}</div>
-        <div class="comm-desc">${c.description||''}</div>
+        ${c.description?`<div class="comm-desc">${c.description}</div>`:''}
         <div class="comm-count">👤 ${(c.members||[]).length} חברים</div>
         <div class="comm-members" onclick="event.stopPropagation()">
           ${members||'<div style="color:var(--t4);font-size:.82rem;padding:8px 0">אין חברים עדיין</div>'}
@@ -2034,7 +2035,10 @@ function renderCommittees(){
       </div>`;
     }).join('');
 
-    document.getElementById('committees-content').innerHTML = `<div class="comm-grid">${cards}</div>`;
+    el.innerHTML = `<div class="comm-grid">${cards}</div>`;
+  }).catch(e=>{
+    el.innerHTML = '<div style="text-align:center;color:var(--t4);padding:20px">שגיאה בטעינת ועדות</div>';
+    console.error('renderCommittees:', e);
   });
 }
 
@@ -2100,8 +2104,6 @@ function openAddCommittee(){
         <input class="finput" id="cn-name" type="text" placeholder="ועדת פורים"></div>
       <div class="fld"><label class="flbl">אייקון (אימוג'י)</label>
         <input class="finput" id="cn-icon" type="text" placeholder="🎭" style="font-size:1.2rem"></div>
-      <div class="fld"><label class="flbl">תיאור קצר</label>
-        <input class="finput" id="cn-desc" type="text" placeholder="תיאור הפעילות..."></div>
       <div style="display:flex;gap:8px;margin-top:20px">
         <button class="btn btn-p" style="flex:1;justify-content:center" onclick="submitAddCommittee()">＋ הוסף ועדה</button>
         <button class="btn btn-o" onclick="document.getElementById('add-comm-modal').remove()">ביטול</button>
@@ -2116,12 +2118,11 @@ async function submitAddCommittee(){
   const name = document.getElementById('cn-name')?.value?.trim();
   if(!name){ showToast('יש להזין שם'); return; }
   const icon = document.getElementById('cn-icon')?.value?.trim() || '⭐';
-  const desc = document.getElementById('cn-desc')?.value?.trim() || '';
   if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
   try{
     const {collection,addDoc} = window._fsImports;
-    const ref = await addDoc(collection(window._db,'committees'),{name,icon,description:desc,members:[]});
-    committeesData.push({id:ref.id,name,icon,description:desc,members:[]});
+    const ref = await addDoc(collection(window._db,'committees'),{name,icon,members:[]});
+    committeesData.push({id:ref.id,name,icon,members:[]});
     document.getElementById('add-comm-modal')?.remove();
     showToast('✓ ועדה נוספה!');
     renderCommittees();
