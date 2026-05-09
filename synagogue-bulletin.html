@@ -1286,7 +1286,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2118</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2255,14 +2255,16 @@ async function deleteMember(id){
 /* ════════════════════════════
    ROLES ADMIN
 ════════════════════════════ */
-async function loadRolesAdmin(){
-  await loadAllData();
-  const shabbatot = getNextShabbatot(6);
-  const el = document.getElementById('roles-admin-content');
-  if(!el) return;
-
-  const weeks = shabbatot.map(s => {
+async function loadRolesAdmin(weekOffset){
+  if(weekOffset === undefined) weekOffset = window._adminWeekOffset || 0;
+  window._adminWeekOffset = weekOffset;
+  loadAllData().then(()=>{
+    const shabbatot = getNextShabbatot(8);
+    const s = shabbatot[weekOffset];
     const sd = rolesData[s.key] || {};
+    const el = document.getElementById('roles-admin-content');
+    if(!el) return;
+
     const ALIYOT_NAMES = ['כהן','לוי','ישראל','רביעי','חמישי','שישי','שביעי','מפטיר'];
     const ALL_ROLES = [
       {key:'chazan_shacharit', label:'חזן שחרית'},
@@ -2276,38 +2278,55 @@ async function loadRolesAdmin(){
       ...ALIYOT_NAMES.map(a=>({key:'aliya_'+a, label:a}))
     ];
 
+    const dl = `<datalist id="members-dl-admin">
+      ${membersData.map(m=>`<option value="${m.name}">`).join('')}
+    </datalist>`;
+
     const rows = ALL_ROLES.map(r=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:.72rem;font-weight:700;color:var(--blue);min-width:80px;flex-shrink:0">${r.label}</span>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.72rem;font-weight:700;color:var(--blue);
+          min-width:90px;flex-shrink:0;line-height:1.3">${r.label}</span>
         <input type="text" value="${sd[r.key]||''}" placeholder="שם..."
           data-date="${s.key}" data-key="${r.key}"
           list="members-dl-admin"
           style="flex:1;background:var(--subtle);border:1px solid var(--border);
-          border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;
-          font-size:.82rem;color:var(--t1);outline:none;direction:rtl">
+          border-radius:6px;padding:6px 8px;font-family:'DM Sans',sans-serif;
+          font-size:.82rem;color:var(--t1);outline:none;direction:rtl;min-width:0">
         <button onclick="openSmartAssign('${s.key}','${r.key}','${r.label}')"
           style="background:var(--blue);color:#fff;border:none;border-radius:50px;
-          font-size:.68rem;font-weight:700;padding:4px 10px;cursor:pointer;
+          font-size:.68rem;font-weight:700;padding:5px 12px;cursor:pointer;
           white-space:nowrap;flex-shrink:0">⚡ שבץ</button>
       </div>`).join('');
 
-    return `
-      <div style="margin-bottom:16px;background:var(--subtle);border:1px solid var(--border);
-                  border-radius:var(--r-md);overflow:hidden">
-        <div style="background:var(--blue);color:#fff;padding:10px 14px;font-weight:700;font-size:.88rem">
-          ${s.label}
+    el.innerHTML = `
+      ${dl}
+      <!-- כותרת + ניווט -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:.95rem;color:var(--t1)">${s.label}</div>
+          <div style="font-size:.72rem;color:var(--t3)">${weekOffset===0?'שבת הקרובה':'שבת מתוכננת'}</div>
         </div>
-        <div style="padding:10px 14px">${rows}</div>
-        <div style="padding:8px 14px;border-top:1px solid var(--border)">
-          <button class="btn btn-p" style="font-size:.78rem;padding:6px 16px"
-            onclick="saveRolesAdmin('${s.key}')">💾 שמור ${s.label}</button>
-        </div>
-      </div>`;
-  }).join('');
-
-  const dl = `<datalist id="members-dl-admin">${membersData.map(m=>`<option value="${m.name}">`).join('')}</datalist>`;
-  el.innerHTML = dl + weeks;
+        ${weekOffset > 0 ? `
+          <button class="btn btn-o" style="font-size:.75rem;padding:5px 12px"
+            onclick="loadRolesAdmin(${weekOffset-1})">← הקודמת</button>` : ''}
+        <button class="btn btn-a" style="font-size:.75rem;padding:5px 12px"
+          onclick="loadRolesAdmin(${weekOffset+1})">הבאה →</button>
+      </div>
+      <!-- שורות שיבוץ -->
+      <div style="background:var(--subtle);border:1px solid var(--border);
+                  border-radius:var(--r-md);padding:8px 14px">
+        ${rows}
+      </div>
+      <!-- כפתור שמירה -->
+      <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:10px"
+        onclick="saveRolesAdmin('${s.key}')">💾 שמור שיבוצים – ${s.label}</button>
+      <!-- כפתור ייצוא -->
+      <button class="btn btn-o" style="width:100%;justify-content:center;margin-top:6px"
+        onclick="exportRolesPNG()">📷 ייצוא PNG</button>
+    `;
+  });
 }
+
 
 async function saveRolesAdmin(dateKey){
   const inputs = document.querySelectorAll(`input[data-date="${dateKey}"]`);
@@ -2330,36 +2349,54 @@ async function loadCommitteesAdmin(){
   if(!el) return;
 
   if(!committeesData.length){
-    el.innerHTML = '<div style="color:var(--t4);font-size:.82rem;text-align:center;padding:12px">אין ועדות</div>';
+    el.innerHTML = `<div style="color:var(--t4);font-size:.82rem;text-align:center;padding:12px">
+      אין ועדות עדיין – לחץ "הוסף ועדה" למעלה
+    </div>`;
     return;
   }
 
-  el.innerHTML = committeesData.map(c=>{
+  // בנה datalist לחברים
+  const dlHtml = `<datalist id="comm-members-dl">
+    ${membersData.map(m=>`<option value="${m.id}" label="${m.name}">`).join('')}
+  </datalist>`;
+
+  el.innerHTML = dlHtml + committeesData.map(c=>{
     const members = (c.members||[]).map(m=>{
-      const mb = membersData.find(x=>x.id===m.memberId)||{name:m.memberId};
-      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0">
-        <span style="flex:1;font-size:.85rem">${mb.name}</span>
-        <span style="font-size:.72rem;color:var(--t3)">${m.role||'חבר'}</span>
-        <button class="btn btn-gd" style="padding:3px 8px;font-size:.72rem"
+      const mb = membersData.find(x=>x.id===m.memberId)||{name:m.memberId||m.name||'?'};
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;
+                          border-bottom:1px solid var(--border)">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--blue-light);
+          border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;
+          font-size:.75rem;font-weight:700;color:var(--blue);flex-shrink:0">
+          ${mb.name.split(' ').map(n=>n[0]).join('').slice(0,2)}
+        </div>
+        <span style="flex:1;font-size:.88rem;font-weight:500">${mb.name}</span>
+        <span style="font-size:.7rem;color:var(--t3)">${m.role||'חבר'}</span>
+        <button style="background:none;border:none;color:var(--t4);cursor:pointer;
+          font-size:.85rem;padding:2px 6px;border-radius:4px"
           onclick="removeCommMember('${c.id}','${m.memberId}')">✕</button>
       </div>`;
-    }).join('');
+    }).join('') || '<div style="color:var(--t4);font-size:.8rem;padding:6px 0">אין חברים עדיין</div>';
 
-    return `<div style="background:var(--subtle);border:1px solid var(--border);
-                border-radius:var(--r-md);padding:12px 14px;margin-bottom:8px">
-      <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">${c.icon} ${c.name}</div>
-      ${members}
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <select id="cadds-${c.id}" style="flex:1;background:var(--card);border:1px solid var(--border);
-          border-radius:var(--r-sm);padding:6px 8px;font-family:'DM Sans',sans-serif;
-          font-size:.8rem;direction:rtl">
-          <option value="">הוסף חבר...</option>
-          ${membersData.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}
+    return `<div style="background:var(--card);border:1px solid var(--border);
+                border-radius:var(--r-md);margin-bottom:10px;overflow:hidden">
+      <div style="background:var(--subtle);padding:10px 14px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:1.2rem">${c.icon||'⭐'}</span>
+        <span style="font-weight:700;font-size:.92rem;flex:1">${c.name}</span>
+        <button style="background:none;border:none;color:#C0392B;cursor:pointer;font-size:.75rem;padding:3px 8px"
+          onclick="deleteCommittee('${c.id}')">🗑️ מחק</button>
+      </div>
+      <div style="padding:8px 14px">${members}</div>
+      <div style="padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:6px">
+        <select id="cadds-${c.id}"
+          style="flex:1;background:var(--subtle);border:1px solid var(--border);
+          border-radius:var(--r-sm);padding:7px 10px;font-family:'DM Sans',sans-serif;
+          font-size:.82rem;color:var(--t1);direction:rtl;outline:none">
+          <option value="">— בחר חבר להוספה —</option>
+          ${membersData.map(m=>`<option value="${m.id}">${m.name}${m.tribe?' ('+m.tribe+')':''}</option>`).join('')}
         </select>
-        <button class="btn btn-a" style="padding:6px 12px;font-size:.78rem"
-          onclick="addCommMemberAdmin('${c.id}')">＋</button>
-        <button class="btn btn-gd" style="font-size:.78rem"
-          onclick="deleteCommittee('${c.id}')">🗑️</button>
+        <button class="btn btn-p" style="padding:7px 14px;font-size:.8rem;white-space:nowrap"
+          onclick="addCommMemberAdmin('${c.id}')">＋ הוסף</button>
       </div>
     </div>`;
   }).join('');
@@ -2574,24 +2611,27 @@ function openSmartAssign(dateKey, roleKey, roleLabel){
 }
 
 async function assignMember(dateKey, roleKey, memberName){
-  // עדכן את ה-input המתאים
-  const inputs = document.querySelectorAll(`input[data-date="${dateKey}"][data-key="${roleKey}"]`);
-  inputs.forEach(inp => inp.value = memberName);
+  // עדכן את ה-input המתאים בכל מסך
+  document.querySelectorAll(`input[data-date="${dateKey}"][data-key="${roleKey}"]`)
+    .forEach(inp => inp.value = memberName);
 
   // עדכן rolesData
   if(!rolesData[dateKey]) rolesData[dateKey] = {};
   rolesData[dateKey][roleKey] = memberName;
 
-  // עדכן מונה שימוש בחבר
-  await updateMemberCount(memberName, roleKey);
-
   document.getElementById('smart-modal')?.remove();
-  showToast(`✓ ${memberName} שובץ ל${roleKey.startsWith('aliya_')?roleKey.replace('aliya_',''):roleKey}`);
+
+  const label = roleKey.startsWith('aliya_') ? roleKey.replace('aliya_','') : roleKey;
+  showToast(`✓ ${memberName} שובץ ל${label}`);
 
   // שמור ב-Firebase
   if(window._firebaseReady && window._db){
-    const {doc,setDoc} = window._fsImports;
-    await setDoc(doc(window._db,'shabbat_roles',dateKey), rolesData[dateKey]);
+    try{
+      const {doc,setDoc} = window._fsImports;
+      await setDoc(doc(window._db,'shabbat_roles',dateKey), rolesData[dateKey]);
+      // עדכן מונה
+      await updateMemberCount(memberName, roleKey);
+    }catch(e){ console.error('assignMember save:', e); }
   }
 }
 
