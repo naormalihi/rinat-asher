@@ -7,7 +7,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -20,7 +20,7 @@
   let db = null, firebaseReady = false;
   try { const app = initializeApp(firebaseConfig); db = getFirestore(app); firebaseReady = true; } catch(e) {}
   window._db = db; window._firebaseReady = firebaseReady;
-  window._fsImports = { doc, setDoc, onSnapshot, getDoc };
+  window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc };
   document.dispatchEvent(new Event("firebaseReady"));
 </script>
 
@@ -209,7 +209,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -222,7 +222,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
   let db = null, firebaseReady = false;
   try { const app = initializeApp(firebaseConfig); db = getFirestore(app); firebaseReady = true; } catch(e) {}
   window._db = db; window._firebaseReady = firebaseReady;
-  window._fsImports = { doc, setDoc, onSnapshot, getDoc };
+  window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc };
   document.dispatchEvent(new Event("firebaseReady"));
 </script>
 
@@ -1296,7 +1296,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2050</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1907,7 +1907,8 @@ let membersData = [];
 
 async function loadAllData(){
   if(!window._firebaseReady || !window._db) return;
-  const {collection, getDocs} = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  const {getDocs} = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  const {collection} = window._fsImports;
   try{
     const [mSnap, rSnap, cSnap] = await Promise.all([
       getDocs(collection(window._db,'members')),
@@ -2100,53 +2101,87 @@ function toggleComm(id){
   document.getElementById('cc-'+id)?.classList.toggle('open');
 }
 
+async function _saveCommToFirebase(comm){
+  if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return false; }
+  try{
+    const {doc,setDoc} = window._fsImports;
+    const {id,...data} = comm;
+    await setDoc(doc(window._db,'committees',id), data);
+    return true;
+  }catch(e){ console.error('saveComm',e); showToast('❌ שגיאה בשמירה'); return false; }
+}
+
 async function addCommMember(commId){
-  const sel = document.getElementById('adds-'+commId);
-  if(!sel||!sel.value){showToast('בחר חבר');return;}
+  const sel = document.getElementById('adds-'+commId) || document.getElementById('cadds-'+commId);
+  if(!sel?.value){showToast('בחר חבר');return;}
   const comm = committeesData.find(c=>c.id===commId);
   if(!comm) return;
   if(!comm.members) comm.members=[];
   if(comm.members.find(m=>m.memberId===sel.value)){showToast('החבר כבר בוועדה');return;}
-  comm.members.push({memberId:sel.value,role:'חבר'});
-  const {doc,setDoc}=window._fsImports;
-  const {id,...data}=comm;
-  await setDoc(doc(window._db,'committees',id),data);
-  showToast('✓ חבר נוסף');
-  renderCommittees();
+  comm.members.push({memberId:sel.value, role:'חבר'});
+  const ok = await _saveCommToFirebase(comm);
+  if(ok){ showToast('✓ חבר נוסף'); renderCommittees(); }
 }
 
-async function removeCommMember(commId,memberId){
-  const comm=committeesData.find(c=>c.id===commId);
+async function removeCommMember(commId, memberId){
+  const comm = committeesData.find(c=>c.id===commId);
   if(!comm) return;
-  comm.members=(comm.members||[]).filter(m=>m.memberId!==memberId);
-  const {doc,setDoc}=window._fsImports;
-  const {id,...data}=comm;
-  await setDoc(doc(window._db,'committees',id),data);
-  showToast('✓ חבר הוסר');
-  renderCommittees();
+  comm.members = (comm.members||[]).filter(m=>m.memberId!==memberId);
+  const ok = await _saveCommToFirebase(comm);
+  if(ok){ showToast('✓ חבר הוסר'); renderCommittees(); }
 }
 
 async function deleteCommittee(commId){
   if(!confirm('למחוק ועדה זו?')) return;
-  const {doc,deleteDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-  await deleteDoc(doc(window._db,'committees',commId));
-  committeesData=committeesData.filter(c=>c.id!==commId);
-  showToast('✓ ועדה נמחקה');
-  renderCommittees();
+  if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
+  try{
+    const {doc,deleteDoc} = window._fsImports;
+    await deleteDoc(doc(window._db,'committees',commId));
+    committeesData = committeesData.filter(c=>c.id!==commId);
+    showToast('✓ ועדה נמחקה');
+    renderCommittees();
+  }catch(e){ showToast('❌ שגיאה במחיקה'); }
 }
 
 function openAddCommittee(){
-  const name=prompt('שם הוועדה:');
-  if(!name) return;
-  const icon=prompt("אייקון (אימוג'י):")||'⭐';
-  const desc=prompt('תיאור קצר:')||'';
-  import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({collection,addDoc})=>{
-    addDoc(collection(window._db,'committees'),{name,icon,description:desc,members:[]}).then(ref=>{
-      committeesData.push({id:ref.id,name,icon,description:desc,members:[]});
-      showToast('✓ ועדה נוספה');
-      renderCommittees();
-    });
-  });
+  const modal = document.createElement('div');
+  modal.id = 'add-comm-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9500;background:rgba(13,27,62,.45);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+                padding:28px;width:100%;max-width:360px;box-shadow:var(--sh-lg)" onclick="event.stopPropagation()">
+      <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.2rem;font-weight:700;color:var(--t1);margin-bottom:16px">הוספת ועדה</div>
+      <div class="fld"><label class="flbl">שם הוועדה *</label>
+        <input class="finput" id="cn-name" type="text" placeholder="ועדת פורים"></div>
+      <div class="fld"><label class="flbl">אייקון (אימוג'י)</label>
+        <input class="finput" id="cn-icon" type="text" placeholder="🎭" style="font-size:1.2rem"></div>
+      <div class="fld"><label class="flbl">תיאור קצר</label>
+        <input class="finput" id="cn-desc" type="text" placeholder="תיאור הפעילות..."></div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-p" style="flex:1;justify-content:center" onclick="submitAddCommittee()">＋ הוסף ועדה</button>
+        <button class="btn btn-o" onclick="document.getElementById('add-comm-modal').remove()">ביטול</button>
+      </div>
+    </div>`;
+  modal.onclick = () => modal.remove();
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('cn-name')?.focus(), 100);
+}
+
+async function submitAddCommittee(){
+  const name = document.getElementById('cn-name')?.value?.trim();
+  if(!name){ showToast('יש להזין שם'); return; }
+  const icon = document.getElementById('cn-icon')?.value?.trim() || '⭐';
+  const desc = document.getElementById('cn-desc')?.value?.trim() || '';
+  if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
+  try{
+    const {collection,addDoc} = window._fsImports;
+    const ref = await addDoc(collection(window._db,'committees'),{name,icon,description:desc,members:[]});
+    committeesData.push({id:ref.id,name,icon,description:desc,members:[]});
+    document.getElementById('add-comm-modal')?.remove();
+    showToast('✓ ועדה נוספה!');
+    renderCommittees();
+    loadCommitteesAdmin();
+  }catch(e){ console.error(e); showToast('❌ שגיאה בשמירה'); }
 }
 
 /* ════════════════════════════
@@ -2245,25 +2280,31 @@ async function submitAddMember(){
   if(chazan) tags.push('חזן');
   if(reader) tags.push('קורא');
 
-  const {collection,addDoc} = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-  const ref = await addDoc(collection(window._db,'members'),{
-    name, phone, tribe, isChazan:chazan, isReader:reader,
-    tags, count_chazan:0, count_reader:0, count_aliya:0
-  });
-  membersData.push({id:ref.id,name,phone,tribe,isChazan:chazan,isReader:reader,
-    tags,count_chazan:0,count_reader:0,count_aliya:0});
-  document.getElementById('add-member-modal')?.remove();
-  renderMembersAdmin();
-  showToast('✓ חבר נוסף!');
+  if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
+  try{
+    const {collection,addDoc} = window._fsImports;
+    const ref = await addDoc(collection(window._db,'members'),{
+      name, phone, tribe, isChazan:chazan, isReader:reader,
+      tags, count_chazan:0, count_reader:0, count_aliya:0
+    });
+    membersData.push({id:ref.id,name,phone,tribe,isChazan:chazan,isReader:reader,
+      tags,count_chazan:0,count_reader:0,count_aliya:0});
+    document.getElementById('add-member-modal')?.remove();
+    renderMembersAdmin();
+    showToast('✓ חבר נוסף!');
+  }catch(e){ console.error(e); showToast('❌ שגיאה בשמירה'); }
 }
 
 async function deleteMember(id){
   if(!confirm('למחוק חבר זה?')) return;
-  const {doc,deleteDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-  await deleteDoc(doc(window._db,'members',id));
-  membersData=membersData.filter(m=>m.id!==id);
-  renderMembersAdmin();
-  showToast('✓ חבר נמחק');
+  if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
+  try{
+    const {doc,deleteDoc} = window._fsImports;
+    await deleteDoc(doc(window._db,'members',id));
+    membersData=membersData.filter(m=>m.id!==id);
+    renderMembersAdmin();
+    showToast('✓ חבר נמחק');
+  }catch(e){ showToast('❌ שגיאה במחיקה'); }
 }
 
 
@@ -2383,12 +2424,9 @@ async function addCommMemberAdmin(commId){
   if(!comm) return;
   if(!comm.members) comm.members=[];
   if(comm.members.find(m=>m.memberId===sel.value)){showToast('החבר כבר בוועדה');return;}
-  comm.members.push({memberId:sel.value,role:'חבר'});
-  const {doc,setDoc}=window._fsImports;
-  const {id,...data}=comm;
-  await setDoc(doc(window._db,'committees',id),data);
-  showToast('✓ חבר נוסף');
-  loadCommitteesAdmin();
+  comm.members.push({memberId:sel.value, role:'חבר'});
+  const ok = await _saveCommToFirebase(comm);
+  if(ok){ showToast('✓ חבר נוסף'); loadCommitteesAdmin(); }
 }
 
 /* ════════════════════════════
@@ -2622,7 +2660,7 @@ async function updateMemberCount(memberName, roleKey){
               : roleKey === 'reader' ? 'count_reader'
               : 'count_aliya';
   m[field] = (m[field]||0) + 1;
-  const {doc,updateDoc} = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  const {doc,updateDoc} = window._fsImports;
   await updateDoc(doc(window._db,'members',m.id), {[field]: m[field]});
 }
 </script>
