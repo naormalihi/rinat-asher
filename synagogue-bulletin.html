@@ -1015,13 +1015,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     </div>
   </div>
 </div>
-<!-- ROLES ACTION BAR -->
-<div id="roles-abar" class="abar" style="display:none">
-  <button class="btn btn-p" onclick="saveCurrentShabbat()">💾 שמור שיבוצים</button>
-  <button class="btn btn-o" onclick="exportRolesPNG()">📷 ייצוא PNG</button>
-  <div style="flex:1"></div>
-  <div class="smsg" id="roles-smsg"></div>
-</div>
+
 
 <!-- COMMITTEES SCREEN -->
 <div id="committees-scr" class="scr page-screen">
@@ -1033,8 +1027,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     </div>
   </div>
 </div>
-<!-- COMMITTEES ACTION BAR - hidden, no buttons for public view -->
-<div id="comm-abar" class="abar" style="display:none"></div>
+
 
 <!-- PRINT VIEW -->
 <div id="pv">
@@ -1293,7 +1286,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2111</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1880,17 +1873,11 @@ function goTab(tab){
     document.getElementById('pub-scr').classList.add('on');
   } else if(tab === 'roles'){
     document.getElementById('roles-scr').classList.add('on');
-    if(authed){
-      const ra = document.getElementById('roles-abar');
-      if(ra) ra.style.display = 'flex';
-    }
+    // עליות – ללא סרגל פעולות ציבורי
     renderRoles();
   } else if(tab === 'committees'){
     document.getElementById('committees-scr').classList.add('on');
-    if(authed){
-      const ca = document.getElementById('comm-abar');
-      if(ca) ca.style.display = 'flex';
-    }
+    // ועדות – ללא סרגל פעולות ציבורי
     renderCommittees();
   }
 }
@@ -2135,7 +2122,10 @@ async function submitAddCommittee(){
     showToast('✓ ועדה נוספה!');
     renderCommittees();
     loadCommitteesAdmin();
-  }catch(e){ console.error(e); showToast('❌ שגיאה בשמירה'); }
+  }catch(e){ 
+    console.error('Committee save error:', e);
+    showToast('❌ ' + (e.code==='permission-denied'?'אין הרשאה – עדכן כללי Firebase':e.message||'שגיאה בשמירה')); 
+  }
 }
 
 /* ════════════════════════════
