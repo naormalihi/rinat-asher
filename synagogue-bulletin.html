@@ -1033,11 +1033,8 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     </div>
   </div>
 </div>
-<!-- COMMITTEES ACTION BAR -->
-<div id="comm-abar" class="abar" style="display:none">
-  <button class="btn btn-p" onclick="openAddCommittee()">＋ הוסף ועדה</button>
-  <div style="flex:1"></div>
-</div>
+<!-- COMMITTEES ACTION BAR - hidden, no buttons for public view -->
+<div id="comm-abar" class="abar" style="display:none"></div>
 
 <!-- PRINT VIEW -->
 <div id="pv">
@@ -1296,7 +1293,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2105</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1952,39 +1949,17 @@ function renderRoles(idx){
     const shabbatot = getNextShabbatot(8);
     const next = shabbatot[_currentShabbatIdx];
     const nd = rolesData[next.key] || {};
-    const isAdm = authed;
+    // תצוגה ציבורית – קריאה בלבד, ללא שיבוץ
 
-    const EXTRA_ROLES = [
-      {key:'petichat_aron', label:'פתיחת ארון'},
-      {key:'hagbaha1', label:'הגבהה ספר ראשון'},
-      {key:'hagbaha2', label:'הגבהה ספר שני'},
-      {key:'holicha1', label:'הולכה ספר ראשון'},
-      {key:'holicha2', label:'הולכה ספר שני'},
-    ];
     const mkRow = (label, key, isAliya=false) => `
       <div class="role-row">
         <span class="role-badge${isAliya?' aliya':''}">${label}</span>
         <span class="${nd[key]?'role-name':'role-empty'}" style="flex:1">${getMemberName(nd[key])||'לא שובץ'}</span>
-        ${isAdm ? `<button onclick="openSmartAssign('${next.key}','${key}','${label}')"
-          style="background:none;border:1px solid var(--blue-border);border-radius:50px;
-          color:var(--blue);font-size:.7rem;font-weight:700;padding:3px 10px;cursor:pointer;
-          white-space:nowrap;transition:all .15s"
-          onmouseover="this.style.background='var(--blue-light)'"
-          onmouseout="this.style.background='none'">⚡ שבץ</button>` : ''}
       </div>`;
 
     const dl = `<datalist id="members-dl">${membersData.map(m=>`<option value="${m.name}">`).join('')}</datalist>`;
 
-    const futureRows = shabbatot.slice(1).map(s=>{
-      const sd = rolesData[s.key]||{};
-      return `<tr>
-        <td>${s.label}</td>
-        <td class="role-col">${getMemberName(sd.chazan_shacharit)||'—'}</td>
-        <td class="role-col">${getMemberName(sd.reader)||'—'}</td>
-        <td class="role-col">${getMemberName(sd['aliya_כהן'])||'—'}</td>
-        <td class="role-col">${getMemberName(sd['aliya_מפטיר'])||'—'}</td>
-      </tr>`;
-    }).join('');
+
 
     document.getElementById('roles-content').innerHTML = `
       ${dl}
@@ -2004,28 +1979,8 @@ function renderRoles(idx){
         ${ALIYOT_NAMES.map(a=>mkRow(a,'aliya_'+a,true)).join('')}
       </div>
 
-      <!-- ניווט שבועות -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 8px">
-        <div class="shd" style="margin:0;flex:1"><span class="shd-t">לוח עתידי</span><div class="shd-l"></div></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px" id="shabbat-nav">
-        ${shabbatot.map((s,i)=>`
-          <button onclick="renderRoles(${i})" style="white-space:nowrap;flex-shrink:0;
-            padding:6px 14px;border-radius:50px;border:1px solid;cursor:pointer;
-            font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;
-            transition:all .18s;
-            ${i===_currentShabbatIdx
-              ? 'background:var(--blue);color:#fff;border-color:var(--blue)'
-              : 'background:var(--subtle);color:var(--t2);border-color:var(--border)'}">
-            ${s.label}
-          </button>`).join('')}
-      </div>
-      <div style="overflow-x:auto;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-sm)">
-        <table class="future-table">
-          <thead><tr><th>שבת</th><th>חזן שחרית</th><th>קורא</th><th>כהן</th><th>מפטיר</th></tr></thead>
-          <tbody>${futureRows}</tbody>
-        </table>
-      </div>`;
+
+`;
   });
 }
 
@@ -2333,13 +2288,17 @@ async function loadRolesAdmin(){
 
     const rows = ALL_ROLES.map(r=>`
       <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:.72rem;font-weight:700;color:var(--blue);min-width:80px">${r.label}</span>
-        <input type="text" value="${sd[r.key]||''}" placeholder="שם חבר..."
+        <span style="font-size:.72rem;font-weight:700;color:var(--blue);min-width:80px;flex-shrink:0">${r.label}</span>
+        <input type="text" value="${sd[r.key]||''}" placeholder="שם..."
           data-date="${s.key}" data-key="${r.key}"
           list="members-dl-admin"
           style="flex:1;background:var(--subtle);border:1px solid var(--border);
           border-radius:6px;padding:5px 8px;font-family:'DM Sans',sans-serif;
           font-size:.82rem;color:var(--t1);outline:none;direction:rtl">
+        <button onclick="openSmartAssign('${s.key}','${r.key}','${r.label}')"
+          style="background:var(--blue);color:#fff;border:none;border-radius:50px;
+          font-size:.68rem;font-weight:700;padding:4px 10px;cursor:pointer;
+          white-space:nowrap;flex-shrink:0">⚡ שבץ</button>
       </div>`).join('');
 
     return `
