@@ -7,7 +7,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -20,7 +20,7 @@
   let db = null, firebaseReady = false;
   try { const app = initializeApp(firebaseConfig); db = getFirestore(app); firebaseReady = true; } catch(e) {}
   window._db = db; window._firebaseReady = firebaseReady;
-  window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc };
+  window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs };
   document.dispatchEvent(new Event("firebaseReady"));
 </script>
 
@@ -209,7 +209,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -222,7 +222,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
   let db = null, firebaseReady = false;
   try { const app = initializeApp(firebaseConfig); db = getFirestore(app); firebaseReady = true; } catch(e) {}
   window._db = db; window._firebaseReady = firebaseReady;
-  window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc };
+  window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs };
   document.dispatchEvent(new Event("firebaseReady"));
 </script>
 
@@ -1296,7 +1296,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2058</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1907,8 +1907,7 @@ let membersData = [];
 
 async function loadAllData(){
   if(!window._firebaseReady || !window._db) return;
-  const {getDocs} = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-  const {collection} = window._fsImports;
+  const {collection, getDocs} = window._fsImports;
   try{
     const [mSnap, rSnap, cSnap] = await Promise.all([
       getDocs(collection(window._db,'members')),
@@ -2135,7 +2134,7 @@ async function deleteCommittee(commId){
   if(!confirm('למחוק ועדה זו?')) return;
   if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
   try{
-    const {doc,deleteDoc} = window._fsImports;
+    const {doc, deleteDoc} = window._fsImports;
     await deleteDoc(doc(window._db,'committees',commId));
     committeesData = committeesData.filter(c=>c.id!==commId);
     showToast('✓ ועדה נמחקה');
@@ -2299,7 +2298,7 @@ async function deleteMember(id){
   if(!confirm('למחוק חבר זה?')) return;
   if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
   try{
-    const {doc,deleteDoc} = window._fsImports;
+    const {doc, deleteDoc} = window._fsImports;
     await deleteDoc(doc(window._db,'members',id));
     membersData=membersData.filter(m=>m.id!==id);
     renderMembersAdmin();
