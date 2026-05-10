@@ -907,6 +907,12 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     </div>
 
     <!-- ניהול עליות וחזנות -->
+    <!-- קטגוריה 2: עליות וחזנות -->
+    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
+      <span style="font-size:1rem">📖</span>
+      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">עליות וחזנות</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
     <div class="ac" id="ac-roles-admin">
       <div class="ac-hd" onclick="tog('ac-roles-admin')">
         <div class="ac-hl"><div class="ac-ico">📖</div><div class="ac-ttl">ניהול עליות וחזנות</div></div>
@@ -924,6 +930,12 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     </div>
 
     <!-- ניהול ועדות -->
+    <!-- קטגוריה 3: ועדות -->
+    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
+      <span style="font-size:1rem">👥</span>
+      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">ועדות</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
     <div class="ac" id="ac-committees-admin">
       <div class="ac-hd" onclick="tog('ac-committees-admin')">
         <div class="ac-hl"><div class="ac-ico">👥</div><div class="ac-ttl">ניהול ועדות</div></div>
@@ -950,6 +962,12 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     </div>
 
         <!-- מאגר חברי קהילה -->
+    <!-- קטגוריה 4: חברי קהילה -->
+    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
+      <span style="font-size:1rem">👤</span>
+      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">חברי קהילה</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
     <div class="ac" id="ac-members">
       <div class="ac-hd" onclick="tog('ac-members')">
         <div class="ac-hl"><div class="ac-ico">👤</div><div class="ac-ttl">מאגר חברי קהילה</div></div>
@@ -1306,7 +1324,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.1349</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2083,7 +2101,7 @@ function renderCommittees(){
         </div>`;
       }).join('');
       return `<div class="comm-card" id="cc-${c.id}" onclick="toggleComm('${c.id}')">
-        <div class="comm-icon">${c.icon||'⭐'}</div>
+        <div class="comm-icon">${c.icon||''}</div>
         <div class="comm-name">${c.name}</div>
         ${c.description?`<div class="comm-desc">${c.description}</div>`:''}
         <div class="comm-count">👤 ${(c.members||[]).length} חברים</div>
@@ -2469,7 +2487,7 @@ async function loadCommitteesAdmin(){
     return `<div style="background:var(--card);border:1px solid var(--border);
                 border-radius:var(--r-md);margin-bottom:10px;overflow:hidden">
       <div style="background:var(--subtle);padding:10px 14px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:1.2rem">${c.icon||'⭐'}</span>
+        <span style="font-size:1.2rem">${c.icon||''}</span>
         <span style="font-weight:700;font-size:.92rem;flex:1">${c.name}</span>
         <button style="background:none;border:none;color:#C0392B;cursor:pointer;font-size:.75rem;padding:3px 8px"
           onclick="deleteCommittee('${c.id}')">🗑️ מחק</button>
