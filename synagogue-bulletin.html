@@ -19,7 +19,19 @@
     measurementId: "G-W7CY1M1B9T"
   };
   let db = null, firebaseReady = false;
-  try { const app = initializeApp(firebaseConfig); db = getFirestore(app); firebaseReady = true; } catch(e) {}
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    const auth = getAuth(app);
+    window._auth = auth;
+    // האזן לשינויי מצב התחברות
+    onAuthStateChanged(auth, (user) => {
+      window._authUser = user || null;
+      if(user){ authed = true; sessionStorage.setItem('adm','1'); }
+      else { authed = false; sessionStorage.removeItem('adm'); }
+    });
+    firebaseReady = true;
+  } catch(e) { console.error('Firebase init:',e); }
   window._db = db; window._firebaseReady = firebaseReady;
   window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs };
   document.dispatchEvent(new Event("firebaseReady"));
@@ -241,7 +253,19 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     measurementId: "G-W7CY1M1B9T"
   };
   let db = null, firebaseReady = false;
-  try { const app = initializeApp(firebaseConfig); db = getFirestore(app); firebaseReady = true; } catch(e) {}
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    const auth = getAuth(app);
+    window._auth = auth;
+    // האזן לשינויי מצב התחברות
+    onAuthStateChanged(auth, (user) => {
+      window._authUser = user || null;
+      if(user){ authed = true; sessionStorage.setItem('adm','1'); }
+      else { authed = false; sessionStorage.removeItem('adm'); }
+    });
+    firebaseReady = true;
+  } catch(e) { console.error('Firebase init:',e); }
   window._db = db; window._firebaseReady = firebaseReady;
   window._fsImports = { doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs };
   document.dispatchEvent(new Event("firebaseReady"));
@@ -1376,7 +1400,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.2008</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
