@@ -638,13 +638,19 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 #gallery-file-input{display:none;}
 
 /* ── TICKER ── */
+#ticker-fixed{
+  position:sticky;
+  top:56px; /* גובה הנאב */
+  z-index:99;
+}
 .ticker-wrap{
   background:var(--blue);
-  border-radius:var(--r-sm);
-  margin-bottom:12px;
+  border-radius:0;
+  margin-bottom:0;
   height:40px;
   position:relative;
   overflow:hidden;
+  box-shadow:0 2px 8px rgba(26,110,189,.15);
 }
 .ticker-slide{
   position:absolute;inset:0;
@@ -818,7 +824,11 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 </nav>
 
 <!-- PUBLIC -->
-<div id="pub-scr" class="scr on"><div id="pub"></div></div>
+<div id="pub-scr" class="scr on">
+  <!-- טיקר הודעות – צמוד לנאב -->
+  <div id="ticker-fixed" style="display:none"></div>
+  <div id="pub"></div>
+</div>
 
 <!-- LOGIN MODAL -->
 <div id="login-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(26,25,22,.45);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this)closeLogin()">
@@ -1009,7 +1019,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 <div id="roles-scr" class="scr page-screen">
   <div class="page-inner">
     <div class="page-title">📖 עליות לתורה וחזנות</div>
-    <div class="page-sub">שיבוץ לשבת הקרובה ולוח עתידי</div>
+    <div class="page-sub">שיבוץ לשבת הקרובה</div>
     <div id="roles-content">
       <div class="loader-ring" style="margin:40px auto"></div>
     </div>
@@ -1193,19 +1203,19 @@ function startClock(){
 let _tickerTimer=null, _tickerIdx=0;
 function startTicker(){
   clearInterval(_tickerTimer);
-  const wrap=document.getElementById('ticker-wrap');
+  const wrap = document.getElementById('ticker-wrap');
   if(!wrap) return;
-  const slides=wrap.querySelectorAll('.ticker-slide');
-  if(slides.length<2) return;
-  _tickerIdx=0;
-  _tickerTimer=setInterval(()=>{
-    const cur=wrap.querySelector('.ticker-slide.active');
-    if(cur){cur.classList.remove('active');cur.classList.add('exit');setTimeout(()=>cur.classList.remove('exit'),350);}
-    _tickerIdx=(_tickerIdx+1)%slides.length;
+  const slides = wrap.querySelectorAll('.ticker-slide');
+  if(slides.length < 2) return;
+  _tickerIdx = 0;
+  _tickerTimer = setInterval(()=>{
+    const cur = wrap.querySelector('.ticker-slide.active');
+    if(cur){ cur.classList.remove('active'); cur.classList.add('exit'); setTimeout(()=>cur.classList.remove('exit'),350); }
+    _tickerIdx = (_tickerIdx+1) % slides.length;
     slides[_tickerIdx].classList.add('active');
-    const c=document.getElementById('ticker-counter');
-    if(c) c.textContent=`${_tickerIdx+1} / ${slides.length}`;
-  },3500);
+    const c = document.getElementById('ticker-counter');
+    if(c) c.textContent = `${_tickerIdx+1} / ${slides.length}`;
+  }, 3500);
 }
 
 /* RENDER PUBLIC */
@@ -1226,6 +1236,17 @@ function renderPub(){
   const upd=D.updatedAt?new Date(D.updatedAt).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
 
   _currentSlide=0;
+  // עדכן טיקר קבוע
+  const tickerFixed = document.getElementById('ticker-fixed');
+  if(tickerFixed){
+    if(D.announcements && D.announcements.length){
+      tickerFixed.style.display = 'block';
+      tickerFixed.innerHTML = renderTicker(D.announcements);
+      setTimeout(startTicker, 100);
+    } else {
+      tickerFixed.style.display = 'none';
+    }
+  }
   document.getElementById('pub').innerHTML=`
   <div style="max-width:560px;margin:0 auto;padding:32px 16px 64px">
     <div class="date-bar fu" id="date-bar">
@@ -1258,7 +1279,6 @@ function renderPub(){
       </div>
     </div>
 
-    ${D.announcements.length ? renderTicker(D.announcements) : ''}
     <div class="shd fu"><span class="shd-t">לוח תפילות</span><div class="shd-l"></div></div>
     <div class="pc fu">${prs}</div>
 
@@ -1286,7 +1306,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.09.2216</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1941,8 +1961,10 @@ function renderRoles(idx){
     const nd = rolesData[next.key] || {};
 
     const CHAZAN_LIST = [
+      {key:'chazan_kabbalat', label:'חזן קבלת שבת וערבית'},
       {key:'chazan_shacharit', label:'חזן שחרית'},
       {key:'chazan_mincha', label:'חזן מנחה'},
+      {key:'chazan_maariv_motzash', label:'חזן ערבית מוצ"ש'},
       {key:'petichat_aron', label:'פתיחת ארון'},
       {key:'hagbaha1', label:'הגבהה ספר א׳'},
       {key:'hagbaha2', label:'הגבהה ספר ב׳'},
@@ -1956,24 +1978,36 @@ function renderRoles(idx){
       .map(a=>({key:'aliya_'+a, label:a}));
 
     const row = (label, key, green=false) => `
-      <div class="role-row">
-        <span class="role-badge${green?' aliya':''}">${label}</span>
-        <span class="${nd[key]?'role-name':'role-empty'}">${getMemberName(nd[key])||'לא שובץ'}</span>
+      <div style="padding:10px 12px;border-bottom:1px solid var(--border);text-align:center">
+        <div style="font-size:.7rem;font-weight:700;padding:2px 12px;border-radius:50px;
+                    display:inline-block;margin-bottom:5px;
+                    background:${green?'var(--grn-light)':'var(--blue-light)'};
+                    color:${green?'var(--grn)':'var(--blue)'};
+                    border:1px solid ${green?'var(--grn-border)':'var(--blue-border)'}">
+          ${label}
+        </div>
+        <div style="font-size:.88rem;font-weight:${nd[key]?'600':'400'};
+                    color:${nd[key]?'var(--t1)':'var(--t4)'};
+                    font-style:${nd[key]?'normal':'italic'}">
+          ${getMemberName(nd[key])||'לא שובץ'}
+        </div>
       </div>`;
 
     el.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="prayers-card">
-          <div style="background:linear-gradient(135deg,var(--blue),var(--blue-mid));color:#fff;padding:12px 16px">
-            <div style="font-size:.68rem;opacity:.8;margin-bottom:2px">חזנים ותפקידים</div>
-            <div style="font-family:'Frank Ruhl Libre',serif;font-size:.95rem;font-weight:700">${next.label}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-sm)">
+          <div style="background:linear-gradient(135deg,var(--blue),var(--blue-mid));color:#fff;
+                      padding:12px 14px;text-align:center">
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;opacity:.8;margin-bottom:3px">חזנים ותפקידים</div>
+            <div style="font-family:'Frank Ruhl Libre',serif;font-size:.9rem;font-weight:700">${next.label}</div>
           </div>
-          ${CHAZAN_LIST.map(r=>row(r.label,r.key)).join('')}
+          ${CHAZAN_LIST.map(r=>row(r.label,r.key,false)).join('')}
         </div>
-        <div class="prayers-card">
-          <div style="background:linear-gradient(135deg,var(--grn),#5DBF38);color:#fff;padding:12px 16px">
-            <div style="font-size:.68rem;opacity:.8;margin-bottom:2px">עליות לתורה</div>
-            <div style="font-family:'Frank Ruhl Libre',serif;font-size:.95rem;font-weight:700">${next.label}</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-sm)">
+          <div style="background:linear-gradient(135deg,var(--grn),#5DBF38);color:#fff;
+                      padding:12px 14px;text-align:center">
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;opacity:.8;margin-bottom:3px">עליות לתורה</div>
+            <div style="font-family:'Frank Ruhl Libre',serif;font-size:.9rem;font-weight:700">${next.label}</div>
           </div>
           ${ALIYA_LIST.map(r=>row(r.label,r.key,true)).join('')}
         </div>
@@ -2292,8 +2326,10 @@ async function loadRolesAdmin(weekOffset){
 
     const ALIYOT_NAMES = ['כהן','לוי','ישראל','רביעי','חמישי','שישי','שביעי','מפטיר'];
     const CHAZAN_ROLES = [
+      {key:'chazan_kabbalat', label:'חזן קבלת שבת וערבית'},
       {key:'chazan_shacharit', label:'חזן שחרית'},
       {key:'chazan_mincha', label:'חזן מנחה'},
+      {key:'chazan_maariv_motzash', label:'חזן ערבית מוצ"ש'},
       {key:'petichat_aron', label:'פתיחת ארון'},
       {key:'hagbaha1', label:'הגבהה ספר ראשון'},
       {key:'hagbaha2', label:'הגבהה ספר שני'},
