@@ -851,66 +851,66 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 </div>
 <!-- ADMIN -->
 <div id="adm-scr" class="scr">
-  <div style="max-width:700px;margin:0 auto;padding:16px 16px 80px">
+  <div style="max-width:700px;margin:0 auto;padding:28px 16px 80px">
+    <div class="a-title">עריכת לוח השבת</div>
+    <div class="a-sub">עדכן את המידע ולחץ שמור • Admin Panel</div>
 
-    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 10px">
-      <span style="font-size:1rem">🕍</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;
-        text-transform:uppercase;color:var(--blue)">לוח שבת והודעות</span>
-      <div style="flex:1;height:1px;background:var(--border)"></div>
-    </div>
-    
-    
-    
-    <div class="ac" id="ac3">
-      <div class="ac-hd" onclick="tog('ac3')"><div class="ac-hl"><div class="ac-ico">📜</div><div class="ac-ttl">דבר תורה</div></div><span class="ac-chev">▼</span></div>
+    <div class="ac open" id="ac0">
+      <div class="ac-hd" onclick="tog('ac0')"><div class="ac-hl"><div class="ac-ico">🏛️</div><div class="ac-ttl">כללי ופרשה</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
-        <div class="fld"><label class="flbl">טקסט</label><textarea class="ftarea" id="fto" rows="5"></textarea></div>
+
+        <!-- Hebcal fetch button -->
+        <div style="background:var(--blue-light);border:1px solid var(--blue-border);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:.82rem;font-weight:600;color:var(--blue);margin-bottom:3px">📅 טעינה אוטומטית מ-Hebcal</div>
+            <div style="font-size:.75rem;color:var(--t3)">זמני שבת ופרשת השבוע לפי אורנית</div>
+          </div>
+          <button class="btn btn-p" onclick="fetchHebcal()" id="hebcal-btn" style="white-space:nowrap;flex-shrink:0">
+            🔄 טען עכשיו
+          </button>
+        </div>
+
+        <!-- Hebcal suggestion box (hidden until fetched) -->
+        <div id="hebcal-suggestion" style="display:none;background:var(--grn-light);border:1px solid var(--grn-border);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:16px">
+          <div style="font-size:.8rem;font-weight:700;color:var(--grn);margin-bottom:10px">✓ הנתונים נטענו – האם לאמץ?</div>
+          <div id="hebcal-preview" style="font-size:.82rem;color:var(--t2);line-height:1.8;margin-bottom:12px"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-p" onclick="applyHebcal()" style="background:var(--grn)">✓ כן, אמץ</button>
+            <button class="btn btn-o" onclick="document.getElementById('hebcal-suggestion').style.display='none'">✕ ביטול</button>
+          </div>
+        </div>
+
+        <div class="fld"><label class="flbl">שם בית הכנסת (עברית)</label><input class="finput" id="fnh" type="text"></div>
+        <div class="fld"><label class="flbl">Synagogue Name (English)</label><input class="finput" id="fne" type="text" dir="ltr"></div>
+        <div class="fld"><label class="flbl">שם הפרשה</label><input class="finput" id="fpa" type="text"></div>
+        <div class="frow">
+          <div class="fld"><label class="flbl">כניסת שבת</label><input class="finput" id="fen" type="text" dir="ltr" placeholder="19:05"></div>
+          <div class="fld"><label class="flbl">יציאת שבת</label><input class="finput" id="fex" type="text" dir="ltr" placeholder="20:07"></div>
+        </div>
       </div>
     </div>
-    <div class="ac" id="ac-gallery">
-      <div class="ac-hd" onclick="tog('ac-gallery')"><div class="ac-hl"><div class="ac-ico">🖼️</div><div class="ac-ttl">גלריית תמונות</div></div><span class="ac-chev">▼</span></div>
+
+    <div class="ac open" id="ac1">
+      <div class="ac-hd" onclick="tog('ac1')"><div class="ac-hl"><div class="ac-ico">🕐</div><div class="ac-ttl">לוח תפילות</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
-        <div class="gallery-admin-grid" id="gallery-admin-grid"></div>
-        <input type="file" id="gallery-file-input" accept="image/*" multiple onchange="handleGalleryUpload(event)">
-        <button class="gallery-upload-btn" onclick="document.getElementById('gallery-file-input').click()">
-          📷 העלה תמונות (עד 10)
-        </button>
-        <div style="font-size:.72rem;color:var(--t4);margin-top:6px;text-align:center">תמונות מוצגות בלוח כגלריה מתחלפת כל 3 שניות</div>
+        <div id="prl"></div>
+        <button class="btn btn-add" onclick="addPr()">＋ הוסף תפילה</button>
       </div>
     </div>
 
-        <!-- מאגר חברי קהילה -->
-    <!-- קטגוריה 4: חברי קהילה -->
+    <div class="ac open" id="ac2">
+      <div class="ac-hd" onclick="tog('ac2')"><div class="ac-hl"><div class="ac-ico">📢</div><div class="ac-ttl">הודעות ואירועים</div></div><span class="ac-chev">▼</span></div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div id="anl"></div>
+        <button class="btn btn-add" onclick="addAn()">＋ הוסף הודעה</button>
+      </div>
+    </div>
+
+    <!-- ניהול עליות וחזנות -->
+    <!-- קטגוריה 2: עליות וחזנות -->
     <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
-      <span style="font-size:1rem">👤</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">חברי קהילה</span>
-      <div style="flex:1;height:1px;background:var(--border)"></div>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 10px">
-      <span style="font-size:1rem">👥</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;
-        text-transform:uppercase;color:var(--blue)">ועדות</span>
-      <div style="flex:1;height:1px;background:var(--border)"></div>
-    </div>
-    <div class="ac" id="ac-committees-admin">
-      <div class="ac-hd" onclick="tog('ac-committees-admin')">
-        <div class="ac-hl"><div class="ac-ico">👥</div><div class="ac-ttl">ניהול ועדות</div></div>
-        <span class="ac-chev">▼</span>
-      </div>
-      <div class="ac-body"><div class="ac-sep"></div>
-        <button class="btn btn-p" style="margin-bottom:12px" onclick="openAddCommittee()">＋ הוסף ועדה</button>
-        <div id="committees-admin-content"></div>
-        <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px"
-          onclick="loadCommitteesAdmin()">🔄 טען / רענן</button>
-      </div>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 10px">
       <span style="font-size:1rem">📖</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;
-        text-transform:uppercase;color:var(--blue)">עליות וחזנות</span>
+      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">עליות וחזנות</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
     <div class="ac" id="ac-roles-admin">
@@ -936,11 +936,36 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">ועדות</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
+    <div class="ac" id="ac-committees-admin">
+      <div class="ac-hd" onclick="tog('ac-committees-admin')">
+        <div class="ac-hl"><div class="ac-ico">👥</div><div class="ac-ttl">ניהול ועדות</div></div>
+        <span class="ac-chev">▼</span>
+      </div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <button class="btn btn-p" style="margin-bottom:12px" onclick="openAddCommittee()">＋ הוסף ועדה</button>
+        <div id="committees-admin-content"></div>
+        <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px"
+          onclick="loadCommitteesAdmin()">🔄 טען / רענן</button>
+      </div>
+    </div>
 
-    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 10px">
-      <span style="font-size:1rem">⚙️</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;
-        text-transform:uppercase;color:var(--blue)">ניהול</span>
+        <div class="ac" id="ac-gallery">
+      <div class="ac-hd" onclick="tog('ac-gallery')"><div class="ac-hl"><div class="ac-ico">🖼️</div><div class="ac-ttl">גלריית תמונות</div></div><span class="ac-chev">▼</span></div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div class="gallery-admin-grid" id="gallery-admin-grid"></div>
+        <input type="file" id="gallery-file-input" accept="image/*" multiple onchange="handleGalleryUpload(event)">
+        <button class="gallery-upload-btn" onclick="document.getElementById('gallery-file-input').click()">
+          📷 העלה תמונות (עד 10)
+        </button>
+        <div style="font-size:.72rem;color:var(--t4);margin-top:6px;text-align:center">תמונות מוצגות בלוח כגלריה מתחלפת כל 3 שניות</div>
+      </div>
+    </div>
+
+        <!-- מאגר חברי קהילה -->
+    <!-- קטגוריה 4: חברי קהילה -->
+    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
+      <span style="font-size:1rem">👤</span>
+      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">חברי קהילה</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
     <div class="ac" id="ac-members">
@@ -961,6 +986,14 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
         </div>
       </div>
     </div>
+
+        <div class="ac" id="ac3">
+      <div class="ac-hd" onclick="tog('ac3')"><div class="ac-hl"><div class="ac-ico">📜</div><div class="ac-ttl">דבר תורה</div></div><span class="ac-chev">▼</span></div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div class="fld"><label class="flbl">טקסט</label><textarea class="ftarea" id="fto" rows="5"></textarea></div>
+      </div>
+    </div>
+
     <div class="ac" id="ac4">
       <div class="ac-hd" onclick="tog('ac4')"><div class="ac-hl"><div class="ac-ico">🔑</div><div class="ac-ttl">שינוי סיסמה</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
@@ -1291,7 +1324,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.1405</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2168,7 +2201,7 @@ function openAddCommittee(){
 async function submitAddCommittee(){
   const name = document.getElementById('cn-name')?.value?.trim();
   if(!name){ showToast('יש להזין שם'); return; }
-  const icon = ''; // ללא אייקון
+  const icon = '⭐'; // ברירת מחדל
   if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
   try{
     const {collection,addDoc} = window._fsImports;
