@@ -8,6 +8,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -229,6 +230,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -874,7 +876,10 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     <button onclick="closeLogin()" style="position:absolute;top:14px;left:16px;background:none;border:none;color:var(--t4);font-size:1.1rem;cursor:pointer;line-height:1;padding:4px">✕</button>
     <div class="lmark">🔑</div>
     <div class="ltitle">כניסת מנהל</div>
-    <div class="lsub">הזן סיסמה לגישה לעריכה</div>
+    <div class="lsub">התחבר עם חשבון המנהל</div>
+    <input class="linput" id="login-email" type="email" placeholder="כתובת מייל" dir="ltr"
+      style="margin-bottom:10px"
+      onkeydown="if(event.key==='Enter')document.getElementById('pw').focus()">
     <div style="position:relative;margin-bottom:12px">
       <input type="password" class="linput" id="pw" placeholder="• • • • • • • •"
         onkeydown="if(event.key==='Enter')tryLogin()"
@@ -1371,7 +1376,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.1951</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
