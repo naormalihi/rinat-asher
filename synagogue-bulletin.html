@@ -1400,7 +1400,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.2018</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1565,16 +1565,48 @@ function closeLogin(){
   document.getElementById('perr').textContent='';
   document.getElementById('pw').value='';
 }
-function tryLogin(){
-  if(document.getElementById('pw').value===PWD){
-    authed=true;sessionStorage.setItem('adm','1');
-    document.getElementById('login-modal').style.display='none';
-    document.getElementById('pw').value='';
-    fillAdm();goScreen('adm');document.getElementById('admin-abar').style.display='flex';showToast('ברוך הבא 👋');
-  }else{
-    document.getElementById('perr').textContent='❌ סיסמה שגויה';
-    document.getElementById('pw').value='';
-    document.getElementById('pw').focus();
+async function tryLogin(){
+  const emailEl = document.getElementById('login-email');
+  const pwEl = document.getElementById('pw');
+  const email = emailEl?.value?.trim() || 'admin@rinatasher.il';
+  const pw = pwEl?.value || '';
+
+  if(!pw){ showToast('הזן סיסמה'); return; }
+
+  const btn = document.querySelector('#login-modal .btn-p');
+  if(btn){ btn.textContent = '⏳...'; btn.disabled = true; }
+
+  try{
+    if(!window._auth) throw new Error('Auth not initialized');
+    const {signInWithEmailAndPassword} = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    await signInWithEmailAndPassword(window._auth, email, pw);
+    authed = true;
+    sessionStorage.setItem('adm','1');
+    if(pwEl) pwEl.value = '';
+    if(emailEl) emailEl.value = '';
+    fillAdm();
+    goScreen('adm');
+    const _ab = document.getElementById('admin-abar');
+    if(_ab) _ab.style.display = 'flex';
+    showToast('ברוך הבא 👋');
+    document.getElementById('login-modal').style.display = 'none';
+  } catch(e){
+    console.error('Login error:', e.code, e.message);
+    const errEl = document.getElementById('perr');
+    const msg = e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential'
+      ? '❌ סיסמה שגויה'
+      : e.code === 'auth/user-not-found'
+      ? '❌ משתמש לא נמצא'
+      : e.code === 'auth/too-many-requests'
+      ? '❌ יותר מדי ניסיונות'
+      : e.code === 'auth/network-request-failed'
+      ? '❌ בעיית רשת'
+      : '❌ שגיאה בהתחברות';
+    if(errEl) errEl.textContent = msg;
+    else showToast(msg);
+    if(pwEl){ pwEl.value=''; pwEl.focus(); }
+  } finally {
+    if(btn){ btn.textContent = 'כניסה'; btn.disabled = false; }
   }
 }
 function logout(){authed=false;sessionStorage.removeItem('adm');goScreen('pub');showToast('יצאת בהצלחה');}
