@@ -1,4 +1,4 @@
-const CACHE = 'rinat-asher-v2026.05.08.1114';
+const CACHE = 'rinat-asher-v2026.05.10.0515';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -15,8 +15,9 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // תמיד נסה לטעון מהרשת קודם
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, {cache: 'no-cache'})
       .then(res => {
         const clone = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
