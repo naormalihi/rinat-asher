@@ -8,7 +8,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -242,7 +242,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCN3fXoeGVH4jh-1YRDIOiyVSXwQNyxhPM",
     authDomain: "rinatasher-7131b.firebaseapp.com",
@@ -1209,6 +1209,13 @@ async function save(){
   const btn=document.querySelector('.btn-p');
   btn.textContent='⏳ שומר...';btn.disabled=true;
   if(window._firebaseReady && window._db){
+    // וודא שה-auth user עדכני לפני שמירה
+    if(window._auth && window._auth.currentUser){
+      try{ await window._auth.currentUser.getIdToken(true); }catch(e){ console.error('token refresh:',e); }
+      console.log('Auth user:', window._auth.currentUser?.email);
+    } else {
+      console.warn('No auth user! Auth:', window._auth, 'CurrentUser:', window._auth?.currentUser);
+    }
     const {doc,setDoc}=window._fsImports;
     try{await setDoc(doc(window._db,'bulletin','main'),D);setSM('✓ נשמר ב-Firebase','ok');
       document.getElementById('fdot-circle').classList.add('on');
@@ -1400,7 +1407,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.2053</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
