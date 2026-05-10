@@ -1324,7 +1324,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.1453</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1544,13 +1544,22 @@ function tog(id){
 /* ── HEBCAL AUTO-FETCH ── */
 let _hebcalData = {};
 
+/* חישוב זמן: addMinutes('19:12', 10) -> '19:22' */
+function addMinutes(timeStr, mins){
+  if(!timeStr) return '';
+  const [h,m] = timeStr.split(':').map(Number);
+  const total = h*60 + m + mins;
+  const nh = Math.floor(((total % 1440) + 1440) % 1440 / 60);
+  const nm = ((total % 60) + 60) % 60;
+  return `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;
+}
+
 async function fetchHebcal(){
   const btn = document.getElementById('hebcal-btn');
   btn.textContent = '⏳ טוען...';
   btn.disabled = true;
 
   try {
-    // קואורדינטות אורנית + 50 דקות אחרי שקיעה (3 כוכבים קטנים)
     const url = 'https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=32.1833&longitude=34.9667&tzid=Asia/Jerusalem&M=on&m=50&b=18&lg=he&leyning=off';
     const res = await fetch(url);
     const data = await res.json();
@@ -1558,7 +1567,6 @@ async function fetchHebcal(){
     let entry='', exit='', parasha='';
     for(const item of data.items||[]){
       if(item.category==='candles'){
-        // זמן כניסה – שעה:דקות
         const d = new Date(item.date);
         entry = d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Jerusalem'});
       }
@@ -1567,7 +1575,6 @@ async function fetchHebcal(){
         exit = d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Jerusalem'});
       }
       if(item.category==='parashat'){
-        // קבל את השם בעברית
         let raw = item.hebrew || item.title;
         parasha = raw.replace(/^פרשת\s+/,'').replace(/^Parashat\s+/i,'').trim();
       }
@@ -1578,11 +1585,23 @@ async function fetchHebcal(){
       return;
     }
 
-    _hebcalData = { entry, exit, parasha };
+    // חשב זמני תפילה
+    const kabbalat  = addMinutes(entry, 10);   // קבלת שבת = כניסה + 10
+    const mincha    = addMinutes(exit, -60);   // מנחה = יציאה - 60
+    const maariv    = addMinutes(exit, -10);   // ערבית מוצ"ש = יציאה - 10
+
+    _hebcalData = { entry, exit, parasha, kabbalat, mincha, maariv };
 
     // הצג הצעה
-    document.getElementById('hebcal-preview').innerHTML =
-      `<b>פרשה:</b> ${parasha}<br><b>כניסת שבת:</b> ${entry}<br><b>יציאת שבת:</b> ${exit}`;
+    document.getElementById('hebcal-preview').innerHTML = `
+      <b>פרשה:</b> ${parasha}<br>
+      <b>כניסת שבת:</b> ${entry}<br>
+      <b>יציאת שבת:</b> ${exit}<br>
+      <hr style="border:none;border-top:1px solid var(--grn-border);margin:8px 0">
+      <div style="font-size:.75rem;font-weight:700;color:var(--grn);margin-bottom:4px">📅 זמני תפילה מוצעים:</div>
+      <b>קבלת שבת וערבית:</b> ${kabbalat}<br>
+      <b>מנחה:</b> ${mincha}<br>
+      <b>ערבית מוצ"ש:</b> ${maariv}`;
     document.getElementById('hebcal-suggestion').style.display = 'block';
     showToast('✓ נתונים נטענו בהצלחה!');
 
@@ -1596,13 +1615,28 @@ async function fetchHebcal(){
 }
 
 function applyHebcal(){
-  if(_hebcalData.entry)  document.getElementById('fen').value = _hebcalData.entry;
-  if(_hebcalData.exit)   document.getElementById('fex').value = _hebcalData.exit;
-  if(_hebcalData.parasha) document.getElementById('fpa').value = _hebcalData.parasha;
-  // עדכן D ישירות
-  if(_hebcalData.entry)  D.entry = _hebcalData.entry;
-  if(_hebcalData.exit)   D.exit = _hebcalData.exit;
-  if(_hebcalData.parasha) D.parasha = _hebcalData.parasha;
+  if(_hebcalData.entry)   { document.getElementById('fen').value = _hebcalData.entry;   D.entry   = _hebcalData.entry; }
+  if(_hebcalData.exit)    { document.getElementById('fex').value = _hebcalData.exit;    D.exit    = _hebcalData.exit; }
+  if(_hebcalData.parasha) { document.getElementById('fpa').value = _hebcalData.parasha; D.parasha = _hebcalData.parasha; }
+
+  // עדכן לוח תפילות לפי זמנים מחושבים
+  if(_hebcalData.kabbalat || _hebcalData.mincha || _hebcalData.maariv){
+    D.prayers = (D.prayers||[]).map(p => {
+      const n = p.name || '';
+      if(_hebcalData.kabbalat && (n.includes('קבלת') || (n.includes('ערבית') && !n.includes('מוצ')))){
+        return {...p, time: _hebcalData.kabbalat};
+      }
+      if(_hebcalData.mincha && n.includes('מנחה') && !n.includes('מוצ')){
+        return {...p, time: _hebcalData.mincha};
+      }
+      if(_hebcalData.maariv && (n.includes('מוצ') || n.includes('מוצ"ש'))){
+        return {...p, time: _hebcalData.maariv};
+      }
+      return p;
+    });
+    rPrl(); // רנדר מחדש את לוח התפילות בניהול
+  }
+
   document.getElementById('hebcal-suggestion').style.display = 'none';
   showToast('✓ הנתונים אומצו – אל תשכח לשמור!');
 }
