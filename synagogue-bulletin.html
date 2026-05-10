@@ -27,10 +27,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://rinatasher.netlify.app/synagogue-bulletin.html">
+<meta property="og:url" content="https://naormalihi.github.io/rinat-asher/synagogue-bulletin.html">
 <meta property="og:title" content="בית הכנסת רינת אשר – לוח שבת">
 <meta property="og:description" content="לוח שבת שבועי | קהילה מסורתית מאורנית – צמרות | זמני תפילות, הודעות ודבר תורה">
-<meta property="og:image" content="https://rinatasher.netlify.app/og-image.jpg">
+<meta property="og:image" content="https://naormalihi.github.io/rinat-asher/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="he_IL">
@@ -38,7 +38,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="בית הכנסת רינת אשר – לוח שבת">
 <meta name="twitter:description" content="לוח שבת שבועי | קהילה מסורתית מאורנית – צמרות">
-<meta name="twitter:image" content="https://rinatasher.netlify.app/og-image.jpg">
+<meta name="twitter:image" content="https://naormalihi.github.io/rinat-asher/og-image.jpg">
 <meta name="description" content="לוח שבת שבועי של בית הכנסת רינת אשר – קהילה מסורתית מאורנית, צמרות">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#8B6A3E">
@@ -229,10 +229,10 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://rinatasher.netlify.app/synagogue-bulletin.html">
+<meta property="og:url" content="https://naormalihi.github.io/rinat-asher/synagogue-bulletin.html">
 <meta property="og:title" content="בית הכנסת רינת אשר – לוח שבת">
 <meta property="og:description" content="לוח שבת שבועי | קהילה מסורתית מאורנית – צמרות | זמני תפילות, הודעות ודבר תורה">
-<meta property="og:image" content="https://rinatasher.netlify.app/og-image.jpg">
+<meta property="og:image" content="https://naormalihi.github.io/rinat-asher/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="he_IL">
@@ -240,7 +240,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="בית הכנסת רינת אשר – לוח שבת">
 <meta name="twitter:description" content="לוח שבת שבועי | קהילה מסורתית מאורנית – צמרות">
-<meta name="twitter:image" content="https://rinatasher.netlify.app/og-image.jpg">
+<meta name="twitter:image" content="https://naormalihi.github.io/rinat-asher/og-image.jpg">
 <meta name="description" content="לוח שבת שבועי של בית הכנסת רינת אשר – קהילה מסורתית מאורנית, צמרות">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#8B6A3E">
@@ -1306,7 +1306,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.0521</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1806,6 +1806,18 @@ async function exportPNG(){
   }
 }
 
+
+function forceRefresh(){
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs=>{
+      regs.forEach(r=>r.unregister());
+    });
+  }
+  caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>{
+    showToast('מנקה cache...');
+    setTimeout(()=>window.location.reload(true), 800);
+  });
+}
 
 function showToast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2800);}
 
@@ -2570,7 +2582,7 @@ async function exportRolesPNG(){
         <tbody>${rows}</tbody>
       </table>
     </div>
-    <div style="text-align:center;padding:12px;font-size:11px;color:#A0B4C8">rinatasher.netlify.app</div>`;
+    <div style="text-align:center;padding:12px;font-size:11px;color:#A0B4C8">naormalihi.github.io/rinat-asher</div>`;
 
   document.body.appendChild(tmp);
   await new Promise(r=>setTimeout(r,400));
