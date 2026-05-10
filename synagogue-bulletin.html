@@ -1399,7 +1399,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.2119</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1573,7 +1573,13 @@ async function tryLogin(){
   try{
     const {doc, getDoc} = window._fsImports;
     const snap = await getDoc(doc(window._db,'bulletin','main'));
-    const stored = snap.data()?.adminPass || 'shabbat2024';
+    const data = snap.data();
+    // הסיסמה נשמרת תחת 'pwd' או 'adminPass'
+    const stored = data?.adminPass || data?.pwd;
+    if(!stored){
+      showToast('❌ לא נמצאה סיסמה ב-Firebase');
+      return;
+    }
     if(pw === stored){
       authed = true;
       sessionStorage.setItem('adm','1');
