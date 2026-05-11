@@ -1399,7 +1399,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.10.2134</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2348,6 +2348,52 @@ async function removeCommMember(commId, memberId){
   }
 }
 
+function openEditCommittee(id){
+  const c = committeesData.find(x=>x.id===id);
+  if(!c) return;
+  const modal = document.createElement('div');
+  modal.id = 'edit-comm-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(26,25,22,.45);display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border-radius:var(--r-xl);padding:28px 24px;width:100%;max-width:420px;box-shadow:var(--sh-lg)">
+      <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.2rem;font-weight:700;margin-bottom:18px;text-align:center">✏️ עריכת ועדה</div>
+      <div class="fld"><label class="flbl">שם הועדה *</label>
+        <input class="finput" id="ec-name" type="text" value="${c.name||''}"></div>
+      <div class="fld"><label class="flbl">תיאור</label>
+        <input class="finput" id="ec-desc" type="text" value="${c.description||''}"></div>
+      <div class="fld"><label class="flbl">אייקון (אימוג'י)</label>
+        <input class="finput" id="ec-icon" type="text" value="${c.icon&&c.icon!=='⭐'?c.icon:''}" style="font-size:1.2rem" placeholder="👥"></div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-p" style="flex:1;justify-content:center"
+          onclick="saveEditCommittee('${c.id}')">💾 שמור</button>
+        <button class="btn btn-o"
+          onclick="document.getElementById('edit-comm-modal').remove()">ביטול</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function saveEditCommittee(id){
+  const name = document.getElementById('ec-name')?.value?.trim();
+  if(!name){ showToast('חובה להזין שם'); return; }
+  const description = document.getElementById('ec-desc')?.value?.trim()||'';
+  const icon = document.getElementById('ec-icon')?.value?.trim()||'';
+  const idx = committeesData.findIndex(x=>x.id===id);
+  if(idx===-1) return;
+  committeesData[idx] = {...committeesData[idx], name, description, icon};
+  if(window._firebaseReady && window._db){
+    try{
+      const {doc, updateDoc} = window._fsImports;
+      await updateDoc(doc(window._db,'committees',id), {name, description, icon});
+      saveCache('cache_committees', committeesData);
+      showToast('✓ הועדה עודכנה');
+    }catch(e){ console.error(e); showToast('❌ שגיאה בעדכון'); return; }
+  }
+  document.getElementById('edit-comm-modal')?.remove();
+  loadCommitteesAdmin();
+  renderCommittees();
+}
+
 async function deleteCommittee(commId){
   if(!confirm('למחוק ועדה זו?')) return;
   if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
@@ -2435,9 +2481,80 @@ function renderMembersAdmin(){
         ${m.phone?`<div class="member-phone">${m.phone}</div>`:''}
         <div style="margin-top:3px">${counts}</div>
       </div>
-      <button class="btn btn-gd" onclick="deleteMember('${m.id}')">✕</button>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="btn btn-o" style="padding:5px 10px;font-size:.75rem"
+          onclick="openEditMember('${m.id}')">✏️</button>
+        <button class="btn btn-gd" style="padding:5px 10px;font-size:.75rem"
+          onclick="deleteMember('${m.id}')">✕</button>
+      </div>
     </div>`;
   }).join('')||'<div style="text-align:center;color:var(--t4);padding:20px;font-size:.85rem">לא נמצאו חברים</div>';
+}
+
+function openEditMember(id){
+  const m = membersData.find(x=>x.id===id);
+  if(!m) return;
+  const modal = document.createElement('div');
+  modal.id = 'edit-member-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(26,25,22,.45);display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border-radius:var(--r-xl);padding:28px 24px;width:100%;max-width:420px;box-shadow:var(--sh-lg)">
+      <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.2rem;font-weight:700;margin-bottom:18px;text-align:center">✏️ עריכת חבר</div>
+      <div class="fld"><label class="flbl">שם מלא *</label>
+        <input class="finput" id="em-name" type="text" value="${m.name||''}"></div>
+      <div class="fld"><label class="flbl">טלפון</label>
+        <input class="finput" id="em-phone" type="tel" value="${m.phone||''}" dir="ltr"></div>
+      <div class="fld"><label class="flbl">שבט</label>
+        <select class="finput" id="em-tribe" style="direction:rtl">
+          <option value="">בחר...</option>
+          <option value="כהן" ${m.tribe==='כהן'?'selected':''}>כהן</option>
+          <option value="לוי" ${m.tribe==='לוי'?'selected':''}>לוי</option>
+          <option value="ישראל" ${m.tribe==='ישראל'?'selected':''}>ישראל</option>
+        </select></div>
+      <div class="fld" style="display:flex;gap:16px;align-items:center">
+        <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+          <input type="checkbox" id="em-chazan" ${m.isChazan?'checked':''}>
+          <span>חזן</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+          <input type="checkbox" id="em-reader" ${m.isReader?'checked':''}>
+          <span>קורא בתורה</span>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-p" style="flex:1;justify-content:center"
+          onclick="saveEditMember('${m.id}')">💾 שמור</button>
+        <button class="btn btn-o"
+          onclick="document.getElementById('edit-member-modal').remove()">ביטול</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function saveEditMember(id){
+  const name = document.getElementById('em-name')?.value?.trim();
+  if(!name){ showToast('חובה להזין שם'); return; }
+  const phone = document.getElementById('em-phone')?.value?.trim()||'';
+  const tribe = document.getElementById('em-tribe')?.value||'';
+  const isChazan = document.getElementById('em-chazan')?.checked||false;
+  const isReader = document.getElementById('em-reader')?.checked||false;
+
+  const idx = membersData.findIndex(x=>x.id===id);
+  if(idx===-1) return;
+
+  const updated = {...membersData[idx], name, phone, tribe, isChazan, isReader};
+  membersData[idx] = updated;
+
+  if(window._firebaseReady && window._db){
+    try{
+      const {doc, updateDoc} = window._fsImports;
+      await updateDoc(doc(window._db,'members',id), {name, phone, tribe, isChazan, isReader});
+      saveCache('cache_members', membersData);
+      showToast('✓ החבר עודכן');
+    }catch(e){ console.error(e); showToast('❌ שגיאה בעדכון'); return; }
+  }
+  document.getElementById('edit-member-modal')?.remove();
+  renderMembersAdmin();
 }
 
 function openAddMember(){
@@ -2671,6 +2788,8 @@ async function loadCommitteesAdmin(){
       <div style="background:var(--subtle);padding:10px 14px;display:flex;align-items:center;gap:8px">
         <span style="font-size:1.2rem">${c.icon||''}</span>
         <span style="font-weight:700;font-size:.92rem;flex:1">${c.name}</span>
+        <button style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.75rem;padding:3px 8px"
+          onclick="openEditCommittee('${c.id}')">✏️ ערוך</button>
         <button style="background:none;border:none;color:#C0392B;cursor:pointer;font-size:.75rem;padding:3px 8px"
           onclick="deleteCommittee('${c.id}')">🗑️ מחק</button>
       </div>
