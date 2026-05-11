@@ -1397,7 +1397,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.1726</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -3146,13 +3146,20 @@ function autoAssignAll(dateKey){
     assigned++;
   });
 
-  // שמור ב-rolesData זמנית
+  // עדכן rolesData מה-assignments שחושבו
   if(!rolesData[dateKey]) rolesData[dateKey] = {};
-  document.querySelectorAll('select[data-date="'+dateKey+'"]').forEach(function(sel){
-    if(sel.value) rolesData[dateKey][sel.dataset.key] = sel.value;
+
+  // עבור על כל ה-selects ועדכן rolesData לפי מה שנבחר
+  ALL_ROLES.forEach(function(role){
+    const sel = document.querySelector('select[data-date="'+dateKey+'"][data-key="'+role.key+'"]');
+    if(sel && sel.value){
+      rolesData[dateKey][role.key] = sel.value;
+    }
   });
+
+  // רנדר מחדש עם הנתונים המעודכנים – loadRolesAdmin קורא מ-rolesData
   loadRolesAdmin(window._adminWeekOffset || 0);
-  setTimeout(function(){ showToast('⚡ שובצו ' + assigned + ' תפקידים – בדוק ואשר לפני שמירה'); }, 400);
+  setTimeout(function(){ showToast('⚡ שובצו ' + assigned + ' תפקידים – בדוק ואשר לפני שמירה'); }, 300);
 }
 
 function smartAssignAndSelect(dateKey, roleKey, roleLabel){
