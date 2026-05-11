@@ -1397,7 +1397,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.1715</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2688,25 +2688,17 @@ async function loadRolesAdmin(weekOffset){
 
     const mkAdminRow = r => {
       const opts = getMembersForRole(r.key);
-      const curVal = sd[r.key]||'';
-      const optionsHtml = `<option value="">— בחר —</option>` +
-        opts.map(m=>`<option value="${m.name}" ${m.name===curVal?'selected':''}>${m.name}</option>`).join('');
-      return `
-      <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:.7rem;font-weight:700;color:var(--blue);
-          min-width:70px;flex-shrink:0;line-height:1.3">${r.label}</span>
-        <select data-date="${s.key}" data-key="${r.key}"
-          style="flex:1;min-width:0;width:0;background:var(--card);border:1px solid var(--border);
-          border-radius:6px;padding:5px 6px;font-family:'DM Sans',sans-serif;
-          font-size:.8rem;color:var(--t1);outline:none;direction:rtl;overflow:hidden;text-overflow:ellipsis">
-          ${optionsHtml}
-        </select>
-        <button onclick="smartAssignAndSelect('${s.key}','${r.key}','${r.label}')"
-          title="שיבוץ אוטומטי לפי לוח צדק"
-          style="background:var(--blue);color:#fff;border:none;border-radius:50px;
-          font-size:.65rem;font-weight:700;padding:4px 8px;cursor:pointer;
-          white-space:nowrap;flex-shrink:0">⚡</button>
-      </div>`;
+      const curVal = sd[r.key] || '';
+      let optHtml = '<option value="">— בחר —</option>';
+      opts.forEach(m => {
+        optHtml += '<option value="' + m.name + '"' + (m.name === curVal ? ' selected' : '') + '>' + m.name + '</option>';
+      });
+      return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">'
+           + '<span style="font-size:.7rem;font-weight:700;color:var(--blue);width:85px;min-width:85px;flex-shrink:0;line-height:1.3">' + r.label + '</span>'
+           + '<select data-date="' + s.key + '" data-key="' + r.key + '" style="flex:1;min-width:0;background:var(--subtle);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:.82rem;color:var(--t1);direction:rtl;outline:none;">'
+           + optHtml
+           + '</select>'
+           + '</div>';
     };
 
     const chazanRows = CHAZAN_ROLES.map(mkAdminRow).join('');
@@ -3154,7 +3146,13 @@ function autoAssignAll(dateKey){
     assigned++;
   });
 
-  showToast(`⚡ שובצו ${assigned} תפקידים – בדוק ואשר לפני שמירה`);
+  // שמור ב-rolesData זמנית
+  if(!rolesData[dateKey]) rolesData[dateKey] = {};
+  document.querySelectorAll('select[data-date="'+dateKey+'"]').forEach(function(sel){
+    if(sel.value) rolesData[dateKey][sel.dataset.key] = sel.value;
+  });
+  loadRolesAdmin(window._adminWeekOffset || 0);
+  setTimeout(function(){ showToast('⚡ שובצו ' + assigned + ' תפקידים – בדוק ואשר לפני שמירה'); }, 400);
 }
 
 function smartAssignAndSelect(dateKey, roleKey, roleLabel){
