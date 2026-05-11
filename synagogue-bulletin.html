@@ -1007,22 +1007,18 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 
 <nav class="nav">
   <div style="display:flex;align-items:center;width:100%;gap:8px">
-    <!-- כפתור ניהול – ימין -->
-    <button onclick="goAdmin()" aria-label="כניסה למסך ניהול" style="background:none;border:1px solid var(--border);
-      border-radius:50px;padding:5px 12px;cursor:pointer;font-size:.8rem;
-      color:var(--t2);margin-right:4px;font-family:'DM Sans',sans-serif;
-      transition:all .18s" onmouseover="this.style.borderColor='var(--blue)'"
-      onmouseout="this.style.borderColor='var(--border)'">⚙️</button>
-    <!-- Tabs – מרכז -->
-    <div style="flex:1;display:flex;justify-content:center">
-      <div class="pills" id="main-tabs">
+    <div class="pills" id="main-tabs">
       <button class="pill on" id="tab-bulletin" onclick="goTab('bulletin')" aria-label="לוח שבת" role="tab">📅 לוח</button>
       <button class="pill" id="tab-about" onclick="goTab('about')" aria-label="מי אנחנו" role="tab">🏡 קהילה</button>
       <button class="pill" id="tab-roles" onclick="goTab('roles')" aria-label="עליות לתורה וחזנות" role="tab">📖 עליות</button>
       <button class="pill" id="tab-committees" onclick="goTab('committees')" aria-label="ועדות הקהילה" role="tab">🫂 ועדות</button>
     </div>
-    </div>
-    <!-- Firebase dot – שמאל -->
+    <div style="flex:1"></div>
+    <button onclick="goAdmin()" aria-label="כניסה למסך ניהול" style="background:none;border:1px solid var(--border);
+      border-radius:50px;padding:5px 12px;cursor:pointer;font-size:.8rem;
+      color:var(--t2);margin-right:4px;font-family:'DM Sans',sans-serif;
+      transition:all .18s" onmouseover="this.style.borderColor='var(--blue)'"
+      onmouseout="this.style.borderColor='var(--border)'">⚙️</button>
     <div style="position:relative;display:inline-flex;align-items:center" id="fdot-wrap"
   onmouseenter="document.getElementById('fdot-tip').style.display='block'"
   onmouseleave="document.getElementById('fdot-tip').style.display='none'">
@@ -1110,7 +1106,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       <div style="flex:1">
         <div class="about-contact-name">יו"ר ועד הקהילה</div>
         <div class="about-contact-role">ראש הקהילה</div>
-        <div class="about-contact-phone" id="contact-chair">${(D.aboutSettings?.['chair-phone']&&D.aboutSettings?.['chair-name'])?'<a href="tel:'+D.aboutSettings['chair-phone']+'" style="color:var(--blue);text-decoration:none">'+D.aboutSettings['chair-name']+' | '+D.aboutSettings['chair-phone']+'</a>':'יעודכן בקרוב'}</div>
+        <div class="about-contact-phone" id="contact-chair"></div>
       </div>
     </div>
     <div class="about-contact-card">
@@ -1118,7 +1114,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       <div style="flex:1">
         <div class="about-contact-name">רכז גיוס תרומות והנצחה</div>
         <div class="about-contact-role">תרומות והנצחה</div>
-        <div class="about-contact-phone" id="contact-donations">${(D.aboutSettings?.['donation-phone']&&D.aboutSettings?.['donation-name'])?'<a href="tel:'+D.aboutSettings['donation-phone']+'" style="color:var(--blue);text-decoration:none">'+D.aboutSettings['donation-name']+' | '+D.aboutSettings['donation-phone']+'</a>':'יעודכן בקרוב'}</div>
+        <div class="about-contact-phone" id="contact-donations"></div>
       </div>
     </div>
     <div class="about-contact-card">
@@ -1126,7 +1122,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       <div style="flex:1">
         <div class="about-contact-name">גזבר הקהילה</div>
         <div class="about-contact-role">ענייני כספים</div>
-        <div class="about-contact-phone" id="contact-treasurer">${(D.aboutSettings?.['treasurer-phone']&&D.aboutSettings?.['treasurer-name'])?'<a href="tel:'+D.aboutSettings['treasurer-phone']+'" style="color:var(--blue);text-decoration:none">'+D.aboutSettings['treasurer-name']+' | '+D.aboutSettings['treasurer-phone']+'</a>':'יעודכן בקרוב'}</div>
+        <div class="about-contact-phone" id="contact-treasurer"></div>
       </div>
     </div>
   </div>
@@ -1667,7 +1663,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.2050</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2283,6 +2279,39 @@ function handleAboutImg(e){
   reader.readAsDataURL(file);
 }
 
+function renderAbout(){
+  const A = D.aboutSettings || {};
+
+  const makeContact = (nameKey, phoneKey, elId) => {
+    const el = document.getElementById(elId);
+    if(!el) return;
+    const name = A[nameKey] || '';
+    const phone = A[phoneKey] || '';
+    if(name && phone){
+      const wa = 'https://wa.me/972' + phone.replace(/^0/,'').replace(/-/g,'');
+      el.innerHTML = '<a href="' + wa + '" target="_blank" style="color:var(--blue);text-decoration:none;font-weight:600">'
+        + name + '<br><span style="font-size:.8rem;direction:ltr;display:inline-block">' + phone + '</span></a>';
+    } else if(name){
+      el.textContent = name;
+    } else {
+      el.textContent = '';
+    }
+  };
+
+  makeContact('chair-name',      'chair-phone',      'contact-chair');
+  makeContact('donation-name',   'donation-phone',   'contact-donations');
+  makeContact('treasurer-name',  'treasurer-phone',  'contact-treasurer');
+
+  // תמונה
+  const img = document.getElementById('about-hero-img');
+  const ph  = document.getElementById('about-hero-placeholder');
+  if(D.aboutHeroImg && img){
+    img.src = D.aboutHeroImg;
+    img.style.display = 'block';
+    if(ph) ph.style.display = 'none';
+  }
+}
+
 function contactDonation(){
   const phone = D.contactDonationPhone || '';
   if(phone){
@@ -2423,6 +2452,7 @@ function goTab(tab){
     renderCommittees();
   } else if(tab === 'about'){
     document.getElementById('about-scr').classList.add('on');
+    renderAbout();
   }
   window.scrollTo({top:0, behavior:'instant'});
 }
