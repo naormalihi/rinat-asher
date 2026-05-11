@@ -571,7 +571,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 .anw{background:var(--subtle);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;transition:box-shadow .15s}
 .anw:focus-within{box-shadow:0 0 0 2px rgba(26,110,189,.12);border-color:var(--blue-border)}
 .anw-t{width:100%;background:none;border:none;outline:none;font-family:'Frank Ruhl Libre',serif;font-size:1rem;font-weight:700;color:var(--t1);direction:rtl;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px}
-.anw-b{width:100%;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:.84rem;color:var(--t2);line-height:1.65;direction:rtl;resize:vertical;min-height:56px}
+.anw-b{resize:vertical;width:100%;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:.84rem;color:var(--t2);line-height:1.65;direction:rtl;resize:vertical;min-height:56px}
 .anw-ft{display:flex;justify-content:flex-end;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
 
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:50px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;transition:all .18s ease;line-height:1}
@@ -1006,8 +1006,6 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       <div class="ac-body"><div class="ac-sep"></div>
         <button class="btn btn-p" style="margin-bottom:12px" onclick="openAddCommittee()">＋ הוסף ועדה</button>
         <div id="committees-admin-content"></div>
-        <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px"
-          onclick="loadCommitteesAdmin()">🔄 טען / רענן</button>
       </div>
     </div>
 
@@ -1397,7 +1395,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.1935</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1519,7 +1517,7 @@ function rAnl(){
   document.getElementById('anl').innerHTML=(D.announcements||[]).map((a,i)=>`
     <div class="anw">
       <input class="anw-t" type="text" value="${a.title}" placeholder="כותרת" oninput="D.announcements[${i}].title=this.value">
-      <textarea class="anw-b" oninput="D.announcements[${i}].body=this.value">${a.body}</textarea>
+      <textarea class="anw-b" style="resize:vertical;min-height:80px" oninput="D.announcements[${i}].body=this.value">${a.body}</textarea>
       <div class="anw-ft"><button class="btn btn-gd" onclick="delAn(${i})">✕ מחק</button></div>
     </div>`).join('');
 }
