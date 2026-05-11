@@ -1395,7 +1395,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.1941</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2786,11 +2786,22 @@ async function saveRolesAdmin(dateKey){
 /* ════════════════════════════
    COMMITTEES ADMIN
 ════════════════════════════ */
-async function loadCommitteesAdmin(){
-  await loadAllData();
+function _renderCommitteesAdmin(){
   const el = document.getElementById('committees-admin-content');
   if(!el) return;
+  _doRenderCommAdmin(el);
+}
 
+async function loadCommitteesAdmin(){
+  if(!membersData.length || !committeesData.length){
+    await loadAllData(true);
+  }
+  const el = document.getElementById('committees-admin-content');
+  if(!el) return;
+  _doRenderCommAdmin(el);
+}
+
+function _doRenderCommAdmin(el){
   if(!committeesData.length){
     el.innerHTML = `<div style="color:var(--t4);font-size:.82rem;text-align:center;padding:12px">
       אין ועדות עדיין – לחץ "הוסף ועדה" למעלה
@@ -2863,9 +2874,11 @@ async function addCommMemberAdmin(commId){
   comm.members.push({ memberId, name: member.name, role: 'חבר' });
   const ok = await _saveCommToFirebase(comm);
   if(ok){
+    saveCache('cache_committees', committeesData);
     showToast(`✓ ${member.name} נוסף לוועדה`);
-    loadCommitteesAdmin();
-    renderCommittees(); // עדכן גם תצוגה ציבורית
+    // רנדר ישירות מהנתונים בזיכרון (ללא טעינה מחדש מ-Firebase)
+    _renderCommitteesAdmin();
+    renderCommittees();
   }
 }
 
