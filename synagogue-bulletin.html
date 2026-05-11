@@ -1399,7 +1399,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.0926</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2734,15 +2734,36 @@ async function loadRolesAdmin(weekOffset){
 
 
 async function saveRolesAdmin(dateKey){
+  if(!window._firebaseReady || !window._db){
+    showToast('❌ Firebase לא מחובר');
+    return;
+  }
   const inputs = document.querySelectorAll(`input[data-date="${dateKey}"]`);
+  if(!inputs.length){
+    showToast('❌ לא נמצאו שדות לשמירה');
+    return;
+  }
   const data = {};
-  inputs.forEach(inp=>{ if(inp.value.trim()) data[inp.dataset.key]=inp.value.trim(); });
-  const {doc, setDoc} = window._fsImports;
+  inputs.forEach(inp=>{
+    const val = inp.value.trim();
+    if(val) data[inp.dataset.key] = val;
+  });
+
+  const btn = document.querySelector(`button[onclick*="saveRolesAdmin('${dateKey}')"]`);
+  if(btn){ btn.textContent='⏳ שומר...'; btn.disabled=true; }
+
   try{
+    const {doc, setDoc} = window._fsImports;
     await setDoc(doc(window._db,'shabbat_roles',dateKey), data);
     rolesData[dateKey] = data;
-    showToast('✓ שיבוצים נשמרו!');
-  }catch(e){ console.error('saveRoles',e); showToast('❌ שגיאה בשמירה – בדוק חיבור'); }
+    saveCache('cache_roles', rolesData);
+    showToast('✓ שיבוצים נשמרו בהצלחה!');
+  }catch(e){
+    console.error('saveRoles',e);
+    showToast('❌ שגיאה בשמירה: ' + (e.message||'בדוק חיבור'));
+  } finally {
+    if(btn){ btn.textContent='💾 שמור שיבוצים'; btn.disabled=false; }
+  }
 }
 
 /* ════════════════════════════
@@ -2924,38 +2945,45 @@ async function exportRolesPNG(){
 ════════════════════════════ */
 
 function getSmartSuggestion(roleKey){
-  // קבע מה הדרישה של התפקיד
-  const isAliya = roleKey.startsWith('aliya_');
-  const isChazan = roleKey.startsWith('chazan');
-  const isReader = roleKey === 'reader';
-  const tribe = roleKey === 'aliya_כהן' ? 'כהן'
-               : roleKey === 'aliya_לוי' ? 'לוי'
-               : null;
+  const isAliya   = roleKey.startsWith('aliya_');
+  const isChazan  = roleKey.startsWith('chazan') || roleKey.includes('chazan');
+  const isReader  = roleKey === 'reader';
+  const isGolel   = roleKey.startsWith('golel');
+  const isHolicha = roleKey.startsWith('holicha');
+  const isHagbaha = roleKey.startsWith('hagbaha');
+  const isPeticha = roleKey === 'petichat_aron';
 
-  // סנן מועמדים מתאימים
+  // שבט נדרש לעליות כהן/לוי
+  const tribeRequired = roleKey === 'aliya_כהן' ? 'כהן'
+                      : roleKey === 'aliya_לוי'  ? 'לוי'
+                      : null;
+
   let candidates = membersData.filter(m => {
-    if(tribe) return m.tribe === tribe;
-    if(isChazan) return m.isChazan;
-    if(isReader) return m.isReader;
-    // עליות ישראל/רביעי וכו' – כולם כשירים (לא כהן/לוי)
-    if(isAliya && !tribe) return !m.tribe || m.tribe === 'ישראל';
+    // עליות עם שבט ספציפי
+    if(tribeRequired) return m.tribe === tribeRequired;
+    // חזן – חייב isChazan
+    if(isChazan) return !!m.isChazan;
+    // קורא – חייב isReader
+    if(isReader) return !!m.isReader;
+    // שאר תפקידים (גולל/הולכה/הגבהה/פתיחה/עליות) – כל חבר
     return true;
   });
 
-  if(!candidates.length) candidates = membersData; // fallback
+  // אם אין מועמדים מתאימים – אל תיפול ל-fallback אלא הצג הודעה
+  if(!candidates.length) return [];
 
-  // מיין לפי מי עלה/שיבץ פחות (לוח צדק)
+  // מיין לפי לוח צדק
   candidates.sort((a,b) => {
-    const countA = isChazan ? (a.count_chazan||0)
-                 : isReader  ? (a.count_reader||0)
-                 : (a.count_aliya||0);
-    const countB = isChazan ? (b.count_chazan||0)
-                 : isReader  ? (b.count_reader||0)
-                 : (b.count_aliya||0);
-    return countA - countB;
+    const ca = isChazan ? (a.count_chazan||0)
+             : isReader  ? (a.count_reader||0)
+             : (a.count_aliya||0);
+    const cb = isChazan ? (b.count_chazan||0)
+             : isReader  ? (b.count_reader||0)
+             : (b.count_aliya||0);
+    return ca - cb;
   });
 
-  return candidates.slice(0, 3); // החזר 3 מועמדים עדיפים
+  return candidates.slice(0, 5);
 }
 
 function openSmartAssign(dateKey, roleKey, roleLabel){
