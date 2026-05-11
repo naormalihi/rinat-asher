@@ -1397,7 +1397,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.0950</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -2726,6 +2726,15 @@ async function loadRolesAdmin(weekOffset){
         <button class="btn btn-a" style="font-size:.75rem;padding:5px 12px"
           onclick="loadRolesAdmin(${weekOffset+1})">הבאה →</button>
       </div>
+      <!-- כפתור שיבוץ אוטומטי מלא -->
+      <button onclick="autoAssignAll('${s.key}')"
+        style="width:100%;background:linear-gradient(135deg,var(--blue),var(--blue-mid));
+          color:#fff;border:none;border-radius:var(--r-md);padding:12px;
+          font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;
+          cursor:pointer;margin-bottom:10px;display:flex;align-items:center;
+          justify-content:center;gap:8px;box-shadow:var(--sh-sm)">
+        ⚡ שבץ הכל אוטומטית לפי לוח צדק
+      </button>
       <!-- 2 עמודות -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <!-- ימין: חזנים -->
@@ -3071,6 +3080,81 @@ function openSmartAssign(dateKey, roleKey, roleLabel){
 
   modal.onclick = () => modal.remove();
   document.body.appendChild(modal);
+}
+
+function autoAssignAll(dateKey){
+  const sd = rolesData[dateKey] || {};
+
+  // רשימת כל התפקידים לפי סדר
+  const ALL_ROLES = [
+    {key:'chazan_kabbalat',    label:'חזן קבלת שבת', type:'chazan'},
+    {key:'chazan_shacharit',   label:'חזן שחרית',    type:'chazan'},
+    {key:'chazan_mincha',      label:'חזן מנחה',     type:'chazan'},
+    {key:'chazan_maariv_motzash', label:'חזן ערבית מוצ"ש', type:'chazan'},
+    {key:'reader',             label:'קורא בתורה',   type:'reader'},
+    {key:'petichat_aron',      label:'פתיחת ארון',   type:'any'},
+    {key:'hagbaha1',           label:'הגבהה א׳',     type:'any'},
+    {key:'hagbaha2',           label:'הגבהה ב׳',     type:'any'},
+    {key:'golel1',             label:'גולל א׳',      type:'any'},
+    {key:'golel2',             label:'גולל ב׳',      type:'any'},
+    {key:'holicha1',           label:'הולכה א׳',     type:'any'},
+    {key:'holicha2',           label:'הולכה ב׳',     type:'any'},
+    {key:'aliya_כהן',          label:'כהן',          type:'tribe_כהן'},
+    {key:'aliya_לוי',          label:'לוי',          type:'tribe_לוי'},
+    {key:'aliya_ישראל',        label:'ישראל',        type:'any'},
+    {key:'aliya_רביעי',        label:'רביעי',        type:'any'},
+    {key:'aliya_חמישי',        label:'חמישי',        type:'any'},
+    {key:'aliya_שישי',         label:'שישי',         type:'any'},
+    {key:'aliya_שביעי',        label:'שביעי',        type:'any'},
+    {key:'aliya_מפטיר',        label:'מפטיר',        type:'any'},
+  ];
+
+  // מונה שיבוצים זמני לשבת זו (לא לשנות count_aliya בפועל)
+  const sessionCount = {}; // name -> count this shabbat
+
+  // עותק של מונים לצורך מיון
+  const getCount = (m, type) => {
+    const base = type==='chazan' ? (m.count_chazan||0)
+               : type==='reader' ? (m.count_reader||0)
+               : (m.count_aliya||0);
+    return base + (sessionCount[m.name]||0) * 0.1; // העדפה קלה לאדם שעוד לא שובץ
+  };
+
+  let assigned = 0;
+
+  ALL_ROLES.forEach(role => {
+    // אם כבר שובץ ידנית – אל תדרוס
+    const sel = document.querySelector(`select[data-date="${dateKey}"][data-key="${role.key}"]`);
+    if(!sel) return;
+    if(sel.value) return; // כבר שובץ
+
+    // בנה רשימת מועמדים
+    let candidates = membersData.filter(m => {
+      if(role.type==='chazan')       return !!m.isChazan;
+      if(role.type==='reader')       return !!m.isReader;
+      if(role.type==='tribe_כהן')   return m.tribe==='כהן';
+      if(role.type==='tribe_לוי')   return m.tribe==='לוי';
+      return true; // any
+    });
+
+    if(!candidates.length) return; // אין מועמדים
+
+    // מיין לפי לוח צדק + שיבוצים זמניים
+    candidates.sort((a,b) => getCount(a,role.type) - getCount(b,role.type));
+
+    const best = candidates[0];
+
+    // עדכן dropdown
+    Array.from(sel.options).forEach(opt => {
+      opt.selected = opt.value === best.name;
+    });
+
+    // עדכן מונה זמני
+    sessionCount[best.name] = (sessionCount[best.name]||0) + 1;
+    assigned++;
+  });
+
+  showToast(`⚡ שובצו ${assigned} תפקידים – בדוק ואשר לפני שמירה`);
 }
 
 function smartAssignAndSelect(dateKey, roleKey, roleLabel){
