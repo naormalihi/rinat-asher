@@ -1397,7 +1397,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.1733</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -3137,29 +3137,21 @@ function autoAssignAll(dateKey){
     const best = candidates[0];
 
     // עדכן dropdown
-    Array.from(sel.options).forEach(opt => {
-      opt.selected = opt.value === best.name;
-    });
+    sel.value = best.name;
 
     // עדכן מונה זמני
     sessionCount[best.name] = (sessionCount[best.name]||0) + 1;
     assigned++;
   });
 
-  // עדכן rolesData מה-assignments שחושבו
+  // עדכן rolesData זמנית (ללא Firebase)
   if(!rolesData[dateKey]) rolesData[dateKey] = {};
-
-  // עבור על כל ה-selects ועדכן rolesData לפי מה שנבחר
   ALL_ROLES.forEach(function(role){
     const sel = document.querySelector('select[data-date="'+dateKey+'"][data-key="'+role.key+'"]');
-    if(sel && sel.value){
-      rolesData[dateKey][role.key] = sel.value;
-    }
+    if(sel && sel.value) rolesData[dateKey][role.key] = sel.value;
   });
 
-  // רנדר מחדש עם הנתונים המעודכנים – loadRolesAdmin קורא מ-rolesData
-  loadRolesAdmin(window._adminWeekOffset || 0);
-  setTimeout(function(){ showToast('⚡ שובצו ' + assigned + ' תפקידים – בדוק ואשר לפני שמירה'); }, 300);
+  showToast('⚡ שובצו ' + assigned + ' תפקידים – בדוק ואשר לפני שמירה');
 }
 
 function smartAssignAndSelect(dateKey, roleKey, roleLabel){
