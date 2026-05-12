@@ -1151,11 +1151,14 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 </div>
 <!-- ADMIN -->
 <div id="adm-scr" class="scr">
-  <div style="max-width:700px;margin:0 auto;padding:28px 16px 80px">
-    <div class="a-title">עריכת לוח השבת</div>
-    <div class="a-sub">עדכן את המידע ולחץ שמור • Admin Panel</div>
+  <div style="max-width:700px;margin:0 auto;padding:16px 16px 80px">
 
-    <div class="ac open" id="ac0">
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0 8px">
+      <span style="font-size:.9rem">🕍</span>
+      <span style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">לוח שבת</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <div class="ac" id="ac0">
       <div class="ac-hd" onclick="tog('ac0')"><div class="ac-hl"><div class="ac-ico">🗓️</div><div class="ac-ttl">כללי ופרשה</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
 
@@ -1189,28 +1192,40 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
         </div>
       </div>
     </div>
-
-    <div class="ac open" id="ac1">
+    <div class="ac" id="ac1">
       <div class="ac-hd" onclick="tog('ac1')"><div class="ac-hl"><div class="ac-ico">🕐</div><div class="ac-ttl">לוח תפילות</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
         <div id="prl"></div>
         <button class="btn btn-add" onclick="addPr()">＋ הוסף תפילה</button>
       </div>
     </div>
-
-    <div class="ac open" id="ac2">
+    <div class="ac" id="ac2">
       <div class="ac-hd" onclick="tog('ac2')"><div class="ac-hl"><div class="ac-ico">📣</div><div class="ac-ttl">הודעות ואירועים</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
         <div id="anl"></div>
         <button class="btn btn-add" onclick="addAn()">＋ הוסף הודעה</button>
       </div>
     </div>
-
-    <!-- ניהול עליות וחזנות -->
-    <!-- קטגוריה 2: עליות וחזנות -->
-    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
-      <span style="font-size:1rem">📖</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">עליות וחזנות</span>
+    <div class="ac" id="ac3">
+      <div class="ac-hd" onclick="tog('ac3')"><div class="ac-hl"><div class="ac-ico">✍️</div><div class="ac-ttl">דבר תורה</div></div><span class="ac-chev">▼</span></div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div class="fld"><label class="flbl">טקסט</label><textarea class="ftarea" id="fto" rows="5"></textarea></div>
+      </div>
+    </div>
+    <div class="ac" id="ac-gallery">
+      <div class="ac-hd" onclick="tog('ac-gallery')"><div class="ac-hl"><div class="ac-ico">🎞️</div><div class="ac-ttl">גלריית תמונות</div></div><span class="ac-chev">▼</span></div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div class="gallery-admin-grid" id="gallery-admin-grid"></div>
+        <input type="file" id="gallery-file-input" accept="image/*" multiple onchange="handleGalleryUpload(event)">
+        <button class="gallery-upload-btn" onclick="document.getElementById('gallery-file-input').click()">
+          📷 העלה תמונות (עד 10)
+        </button>
+        <div style="font-size:.72rem;color:var(--t4);margin-top:6px;text-align:center">תמונות מוצגות בלוח כגלריה מתחלפת כל 3 שניות</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0 8px">
+      <span style="font-size:.9rem">📖</span>
+      <span style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">עליות וחזנות</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
     <div class="ac" id="ac-roles-admin">
@@ -1226,12 +1241,9 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
         </div>
       </div>
     </div>
-
-    <!-- ניהול ועדות -->
-    <!-- קטגוריה 3: ועדות -->
-    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
-      <span style="font-size:1rem">👥</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">ועדות</span>
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0 8px">
+      <span style="font-size:.9rem">🫂</span>
+      <span style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">ועדות</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
     <div class="ac" id="ac-committees-admin">
@@ -1244,52 +1256,11 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
         <div id="committees-admin-content"></div>
       </div>
     </div>
-
-        <div class="ac" id="ac-gallery">
-      <div class="ac-hd" onclick="tog('ac-gallery')"><div class="ac-hl"><div class="ac-ico">🎞️</div><div class="ac-ttl">גלריית תמונות</div></div><span class="ac-chev">▼</span></div>
-      <div class="ac-body"><div class="ac-sep"></div>
-        <div class="gallery-admin-grid" id="gallery-admin-grid"></div>
-        <input type="file" id="gallery-file-input" accept="image/*" multiple onchange="handleGalleryUpload(event)">
-        <button class="gallery-upload-btn" onclick="document.getElementById('gallery-file-input').click()">
-          📷 העלה תמונות (עד 10)
-        </button>
-        <div style="font-size:.72rem;color:var(--t4);margin-top:6px;text-align:center">תמונות מוצגות בלוח כגלריה מתחלפת כל 3 שניות</div>
-      </div>
-    </div>
-
-        <!-- מאגר חברי קהילה -->
-    <!-- קטגוריה 4: חברי קהילה -->
-    <div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px">
-      <span style="font-size:1rem">👤</span>
-      <span style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">חברי קהילה</span>
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0 8px">
+      <span style="font-size:.9rem">🏡</span>
+      <span style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">קהילה</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
-    <div class="ac" id="ac-members">
-      <div class="ac-hd" onclick="tog('ac-members')">
-        <div class="ac-hl"><div class="ac-ico">🪪</div><div class="ac-ttl">מאגר חברי קהילה</div></div>
-        <span class="ac-chev">▼</span>
-      </div>
-      <div class="ac-body"><div class="ac-sep"></div>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <input class="member-search" id="member-search-input" type="text"
-            placeholder="🔍 חיפוש חבר..." oninput="renderMembersAdmin()">
-          <button class="btn btn-p" onclick="openAddMember()" style="white-space:nowrap;border-radius:var(--r-sm)">＋ חבר חדש</button>
-        </div>
-        <div id="members-admin-list">
-          <div style="text-align:center;color:var(--t4);padding:20px;font-size:.85rem">
-            טוען חברים...
-          </div>
-        </div>
-      </div>
-    </div>
-
-        <div class="ac" id="ac3">
-      <div class="ac-hd" onclick="tog('ac3')"><div class="ac-hl"><div class="ac-ico">✍️</div><div class="ac-ttl">דבר תורה</div></div><span class="ac-chev">▼</span></div>
-      <div class="ac-body"><div class="ac-sep"></div>
-        <div class="fld"><label class="flbl">טקסט</label><textarea class="ftarea" id="fto" rows="5"></textarea></div>
-      </div>
-    </div>
-
     <div class="ac" id="ac-about-settings">
       <div class="ac-hd" onclick="tog('ac-about-settings')">
         <div class="ac-hl"><div class="ac-ico">🏡</div><div class="ac-ttl">הגדרות דף קהילה</div></div>
@@ -1321,7 +1292,29 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
         </div>
       </div>
     </div>
-
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0 8px">
+      <span style="font-size:.9rem">⚙️</span>
+      <span style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">ניהול כללי</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <div class="ac" id="ac-members">
+      <div class="ac-hd" onclick="tog('ac-members')">
+        <div class="ac-hl"><div class="ac-ico">🪪</div><div class="ac-ttl">מאגר חברי קהילה</div></div>
+        <span class="ac-chev">▼</span>
+      </div>
+      <div class="ac-body"><div class="ac-sep"></div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input class="member-search" id="member-search-input" type="text"
+            placeholder="🔍 חיפוש חבר..." oninput="renderMembersAdmin()">
+          <button class="btn btn-p" onclick="openAddMember()" style="white-space:nowrap;border-radius:var(--r-sm)">＋ חבר חדש</button>
+        </div>
+        <div id="members-admin-list">
+          <div style="text-align:center;color:var(--t4);padding:20px;font-size:.85rem">
+            טוען חברים...
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="ac" id="ac4">
       <div class="ac-hd" onclick="tog('ac4')"><div class="ac-hl"><div class="ac-ico">🔐</div><div class="ac-ttl">שינוי סיסמה</div></div><span class="ac-chev">▼</span></div>
       <div class="ac-body"><div class="ac-sep"></div>
@@ -1349,19 +1342,9 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
         </div>
       </div>
     </div>
-
-        <div class="abar" id="admin-abar">
-      <button class="btn btn-p" onclick="save()">💾 שמור שינויים</button>
-      <button class="btn btn-o" onclick="goScreen('pub')">👁️ תצוגה מקדימה</button>
-      <button class="btn btn-a" onclick="openPrint()">📷 ייצוא PNG</button>
-      <div style="flex:1"></div>
-      <div class="smsg" id="smsg"></div>
-      <button class="btn btn-gd" onclick="logout()">יציאה</button>
-    </div>
   </div>
 </div>
 
-<!-- ROLES SCREEN -->
 <div id="roles-scr" class="scr page-screen">
   <div class="page-inner">
     <div class="page-title">📖 עליות לתורה וחזנות</div>
@@ -1663,7 +1646,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.11.2100</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
@@ -1842,38 +1825,49 @@ function closeLogin(){
 async function tryLogin(){
   const pw = document.getElementById('pw')?.value;
   if(!pw){ showToast('הזן סיסמה'); return; }
-  if(!window._firebaseReady || !window._db){ showToast('❌ Firebase לא מחובר'); return; }
+
   const btn = document.querySelector('#login-modal .btn-p');
   if(btn){ btn.textContent = '⏳...'; btn.disabled = true; }
+
+  const doLogin = () => {
+    authed = true;
+    sessionStorage.setItem('adm','1');
+    document.getElementById('pw').value='';
+    fillAdm();
+    goScreen('adm');
+    const _ab=document.getElementById('admin-abar');
+    if(_ab) _ab.style.display='flex';
+    showToast('ברוך הבא 👋');
+    document.getElementById('login-modal').style.display='none';
+  };
+
+  const failLogin = () => {
+    const errEl = document.getElementById('perr');
+    if(errEl) errEl.textContent='❌ סיסמה שגויה';
+    document.getElementById('pw').value='';
+    document.getElementById('pw').focus();
+  };
+
+  // ללא Firebase – השתמש בסיסמה מקומית
+  if(!window._firebaseReady || !window._db){
+    if(pw === PWD){ doLogin(); }
+    else { failLogin(); }
+    if(btn){ btn.textContent='כניסה'; btn.disabled=false; }
+    return;
+  }
+
   try{
     const {doc, getDoc} = window._fsImports;
     const snap = await getDoc(doc(window._db,'bulletin','main'));
     const data = snap.data();
-    // הסיסמה נשמרת תחת 'pwd' או 'adminPass'
-    const stored = data?.adminPass || data?.pwd;
-    if(!stored){
-      showToast('❌ לא נמצאה סיסמה ב-Firebase');
-      return;
-    }
-    if(pw === stored){
-      authed = true;
-      sessionStorage.setItem('adm','1');
-      document.getElementById('pw').value='';
-      fillAdm();
-      goScreen('adm');
-      const _ab=document.getElementById('admin-abar');
-      if(_ab) _ab.style.display='flex';
-      showToast('ברוך הבא 👋');
-      document.getElementById('login-modal').style.display='none';
-    } else {
-      const errEl = document.getElementById('perr');
-      if(errEl) errEl.textContent='❌ סיסמה שגויה';
-      document.getElementById('pw').value='';
-      document.getElementById('pw').focus();
-    }
+    const stored = data?.adminPass || data?.pwd || PWD;
+    if(pw === stored){ doLogin(); }
+    else { failLogin(); }
   } catch(e){
     console.error('Login:',e);
-    showToast('❌ שגיאה בהתחברות');
+    // fallback לסיסמה מקומית
+    if(pw === PWD){ doLogin(); }
+    else { failLogin(); }
   } finally {
     if(btn){ btn.textContent='כניסה'; btn.disabled=false; }
   }
@@ -2313,9 +2307,10 @@ function renderAbout(){
 }
 
 function contactDonation(){
-  const phone = D.contactDonationPhone || '';
+  const phone = (D.aboutSettings && D.aboutSettings['wa-phone']) || D.contactDonationPhone || '';
   if(phone){
-    window.open('https://wa.me/972' + phone.replace(/^0/,'').replace(/-/g,''), '_blank');
+    const clean = phone.replace(/^0/,'').replace(/-/g,'').replace(/\s/g,'');
+    window.open('https://wa.me/972' + clean, '_blank');
   } else {
     showToast('מספר לתרומה יעודכן בקרוב');
   }
@@ -2434,7 +2429,10 @@ function goTab(tab){
   const btn = document.getElementById('tab-' + tab);
   if(btn) btn.classList.add('on');
   // הסתר כל מסכים וסרגלים
-  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.scr').forEach(s => {
+    s.classList.remove('on');
+    s.style.display = ''; // אפס inline style
+  });
   ['admin-abar','roles-abar','comm-abar'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.style.display = 'none';
