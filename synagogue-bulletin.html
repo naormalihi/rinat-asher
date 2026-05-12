@@ -1034,6 +1034,15 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 </nav>
 
 <!-- PUBLIC -->
+<div id="admin-abar" class="abar" style="display:none">
+  <button class="btn btn-gd" onclick="logout()">יציאה</button>
+  <div style="flex:1"></div>
+  <div class="smsg" id="smsg"></div>
+  <button class="btn btn-o" onclick="goTab('bulletin')">👁️ תצוגה מקדימה</button>
+  <button class="btn btn-a" onclick="openPrint()">📷 ייצוא PNG</button>
+  <button class="btn btn-p" onclick="save()">💾 שמור שינויים</button>
+</div>
+
 <div id="pub-scr" class="scr on">
   <!-- טיקר הודעות – צמוד לנאב -->
   <div id="ticker-fixed" style="display:none"></div>
@@ -1646,7 +1655,7 @@ function renderPub(){
       <div class="pub-ft-n">${D.nameHe}</div>
       ${upd?`<div class="pub-ft-u"><div class="pub-ft-ud"></div>עודכן ${upd}</div>`:''}
       <div style="margin-top:8px;font-size:0.62rem;color:var(--t4);
-                  letter-spacing:.08em;opacity:0.6">v2026.05.12.0439</div>
+                  letter-spacing:.08em;opacity:0.6">v2026.05.08.1114</div>
     </div>
   </div>`;
 }
