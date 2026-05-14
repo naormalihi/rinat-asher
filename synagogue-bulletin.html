@@ -1010,7 +1010,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
     <div class="pills" id="main-tabs">
       <button class="pill on" id="tab-bulletin" onclick="goTab('bulletin')" aria-label="לוח שבת" role="tab">📅 לוח</button>
       <button class="pill" id="tab-about" onclick="goTab('about')" aria-label="מי אנחנו" role="tab">🏡 קהילה</button>
-      <button class="pill" id="tab-roles" onclick="goTab('roles')" aria-label="עליות לתורה וחזנות" role="tab">📖 עליות</button>
+      
       <button class="pill" id="tab-committees" onclick="goTab('committees')" aria-label="ועדות הקהילה" role="tab">🫂 ועדות</button>
     </div>
     <div style="flex:1"></div>
@@ -1078,19 +1078,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
       אנו בונים בימים אלו את בית הכנסת "רינת אשר", שיהווה הרבה מעבר למקום תפילה – זהו מרכז רוחני וחברתי לדור ההמשך שלנו, הממלא את האולם בתפילת ילדים מדי שבת.
     </p>
   </div>
-
-  <!-- הנצחה וחזון -->
-  <div class="about-section" style="padding-top:0">
-    <div class="about-section-title">🕯️ הנצחה וחזון</div>
-    <p class="about-text">
-      בית הכנסת "רינת אשר" נושא את שמה לזכר משפחת זינגר. השם "רינת אשר" מבטא את השמחה והברכה שהקהילה מבקשת להביא לחיי חבריה ולדורות הבאים.
-    </p>
-    <p class="about-text">
-      בניין הקבע כבר עומד על תילו, ואנו מזמינים אתכם להיות חלק מהשלמת המשימה. כל תרומה היא לבנה נוספת בבניין הקהילה.
-    </p>
-  </div>
-
-  <!-- תרומה -->
+<!-- תרומה -->
   <div class="about-donation-block">
     <div class="about-donation-title">🤝 היו שותפים בבניין</div>
     <div class="about-donation-sub">
@@ -1111,7 +1099,7 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
   <div class="about-section">
     <div class="about-section-title">📞 אנשי קשר</div>
     <div class="about-contact-card">
-      <div class="about-contact-avatar">👑</div>
+      <div class="about-contact-avatar">👤</div>
       <div style="flex:1">
         <div class="about-contact-name">יו"ר ועד הקהילה</div>
         <div class="about-contact-role">ראש הקהילה</div>
@@ -1143,8 +1131,8 @@ body{font-family:'DM Sans','Heebo',sans-serif;background:var(--bg);color:var(--t
 <div id="login-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(26,25,22,.45);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this)closeLogin()">
   <div class="lcard" style="position:relative" onclick="event.stopPropagation()">
     <button onclick="closeLogin()" style="position:absolute;top:14px;left:16px;background:none;border:none;color:var(--t4);font-size:1.1rem;cursor:pointer;line-height:1;padding:4px">✕</button>
-    <div class="lmark">🔑</div>
-    <div class="ltitle">כניסת מנהל</div>
+    <div class="lmark">⚙️</div>
+    <div class="ltitle">⚙️ כניסה למערכת</div>
     <div class="lsub">הזן סיסמה לגישה לעריכה</div>
     <div style="position:relative;margin-bottom:12px">
       <input type="password" class="linput" id="pw" placeholder="• • • • • • • •"
